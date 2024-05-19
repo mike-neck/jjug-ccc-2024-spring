@@ -4,7 +4,8 @@ import java.util.Set;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
-public class PublishedShareHolderTicketsDatabaseImpl implements PublishedShareHolderTicketsDatabase {
+public class PublishedShareHolderTicketsDatabaseImpl
+    implements PublishedShareHolderTicketsDatabase {
 
   final @NotNull Set<@NotNull UUID> publishedTickets =
       Set.of(
@@ -17,8 +18,7 @@ public class PublishedShareHolderTicketsDatabaseImpl implements PublishedShareHo
           UUID.fromString("7A696A9D-3294-4159-90BB-2DCE93FA5F1C"),
           UUID.fromString("5B491058-9893-4039-A158-94140067281E"),
           UUID.fromString("2BD3230A-EEE2-4DB5-B114-2BB126A47897"),
-          UUID.fromString("1CD539FA-D21F-4369-90A7-8EF5F808F922")
-      );
+          UUID.fromString("1CD539FA-D21F-4369-90A7-8EF5F808F922"));
 
   @Override
   public boolean isPublishedShareHolderTicket(@NotNull UUID ticketId) {

@@ -8,5 +8,4 @@ public record Audience(
     @NotNull UUID id,
     @NotNull PersonalStamp newPersonalStamp,
     @NotNull Price price,
-    @NotNull List<Discount> discountDetails
-) {}
+    @NotNull List<Discount> discountDetails) {}
