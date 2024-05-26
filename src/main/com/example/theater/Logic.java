@@ -32,194 +32,234 @@ public class Logic {
   }
 
   public @NotNull List<Audience> calculateAdmissionFee(@NotNull VisitorGroup visitorGroup) {
-    Price p = priceConfiguration.getBasePrice();
-    Map<UUID, Price> bp = new HashMap<>();
-    Map<UUID, List<Discount>> dp = new HashMap<>();
-    boolean a = false;
-    Price d20 = new Price(p.value() * 4 / 5);
-    Price d80 = new Price(p.value() - d20.value());
-    Price d50 = new Price(p.value() / 2);
+    Price basePrice = priceConfiguration.getBasePrice();
+    Map<UUID, Price> visitorToPrice = new HashMap<>();
+    Map<UUID, List<Discount>> visitorToDiscount = new HashMap<>();
+    boolean companionDiscountAvailable = false;
+    Price eightyPercentOfBasePrice = new Price(basePrice.value() * 4 / 5);
+    Price twentyPercentOfBasePrice =
+        new Price(basePrice.value() - eightyPercentOfBasePrice.value());
+    Price halfOfBasePrice = new Price(basePrice.value() / 2);
 
-    for (Visitor v : visitorGroup) {
-      UUID i = v.id();
-      DiscountType d = v.discount();
-      if (d == null) {
-        if (a) {
-          bp.put(i, d20);
-          dp.put(
-              i,
+    for (Visitor visitor : visitorGroup) {
+      UUID visitorId = visitor.id();
+      DiscountType discountTypeByVisitorProperties = visitor.discount();
+      if (discountTypeByVisitorProperties == null) {
+        if (companionDiscountAvailable) {
+          visitorToPrice.put(visitorId, eightyPercentOfBasePrice);
+          visitorToDiscount.put(
+              visitorId,
               new ArrayList<>(
                   List.of(
                       new Discount(
-                          d80, DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES)))));
-          a = false;
+                          twentyPercentOfBasePrice,
+                          DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES)))));
+          companionDiscountAvailable = false;
         } else {
-          bp.put(i, p);
-          dp.put(i, new ArrayList<>());
+          visitorToPrice.put(visitorId, basePrice);
+          visitorToDiscount.put(visitorId, new ArrayList<>());
         }
       } else {
-        if (d instanceof ShareHolderTicket s) {
+        if (discountTypeByVisitorProperties instanceof ShareHolderTicket s) {
           if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(s.id())) {
-            for (Visitor g : visitorGroup) {
-              bp.put(g.id(), new Price(0));
-              dp.put(g.id(), List.of(new Discount(p, DiscountDescription.of("株主優待券", s))));
+            for (Visitor companionVisitor : visitorGroup) {
+              visitorToPrice.put(companionVisitor.id(), new Price(0));
+              visitorToDiscount.put(
+                  companionVisitor.id(),
+                  List.of(new Discount(basePrice, DiscountDescription.of("株主優待券", s))));
             }
-            List<Audience> l = new ArrayList<>();
-            for (Visitor g : visitorGroup) {
-              PersonalStamp ps = g.personalStamp();
-              List<Discount> ds = dp.computeIfAbsent(g.id(), _ -> new ArrayList<>());
-              Audience u =
+            List<Audience> result = new ArrayList<>();
+            for (Visitor companionVisitor : visitorGroup) {
+              PersonalStamp personalStamp = companionVisitor.personalStamp();
+              List<Discount> discountDetails =
+                  visitorToDiscount.computeIfAbsent(companionVisitor.id(), _ -> new ArrayList<>());
+              Audience audience =
                   new Audience(
-                      g.id(),
-                      ps == null ? new PersonalStamp(0) : ps,
+                      companionVisitor.id(),
+                      personalStamp == null ? new PersonalStamp(0) : personalStamp,
                       new Price(0),
-                      List.copyOf(ds));
-              l.add(u);
+                      List.copyOf(discountDetails));
+              result.add(audience);
             }
-            return List.copyOf(l);
+            return List.copyOf(result);
           } else {
-            bp.put(i, p);
-            dp.put(i, new ArrayList<>());
+            visitorToPrice.put(visitorId, basePrice);
+            visitorToDiscount.put(visitorId, new ArrayList<>());
           }
-        } else if (d instanceof DiscountTypes t) {
-          switch (t) {
+        } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
+          switch (discountType) {
             case CHILD -> {
-              bp.put(i, d50);
-              dp.put(
-                  i,
-                  new ArrayList<>(List.of(new Discount(d50, DiscountDescription.of("子供割引", t)))));
+              visitorToPrice.put(visitorId, halfOfBasePrice);
+              visitorToDiscount.put(
+                  visitorId,
+                  new ArrayList<>(
+                      List.of(
+                          new Discount(
+                              halfOfBasePrice, DiscountDescription.of("子供割引", discountType)))));
             }
             case DISABILITIES -> {
-              bp.put(i, d20);
-              dp.put(
-                  i,
-                  new ArrayList<>(List.of(new Discount(d80, DiscountDescription.of("障がい者割引", t)))));
-              boolean f = false;
-              for (UUID u : Set.copyOf(bp.keySet())) {
-                if (p.equals(bp.get(u))) {
-                  f = true;
-                  bp.put(u, d20);
-                  dp.put(
-                      u,
+              visitorToPrice.put(visitorId, eightyPercentOfBasePrice);
+              visitorToDiscount.put(
+                  visitorId,
+                  new ArrayList<>(
+                      List.of(
+                          new Discount(
+                              twentyPercentOfBasePrice,
+                              DiscountDescription.of("障がい者割引", discountType)))));
+              boolean companionFound = false;
+              for (UUID companionVisitorId : Set.copyOf(visitorToPrice.keySet())) {
+                if (basePrice.equals(visitorToPrice.get(companionVisitorId))) {
+                  companionFound = true;
+                  visitorToPrice.put(companionVisitorId, eightyPercentOfBasePrice);
+                  visitorToDiscount.put(
+                      companionVisitorId,
                       new ArrayList<>(
-                          List.of(new Discount(d80, DiscountDescription.of("障がい者割引", t)))));
+                          List.of(
+                              new Discount(
+                                  twentyPercentOfBasePrice,
+                                  DiscountDescription.of("障がい者割引", discountType)))));
                   break;
                 }
               }
-              if (!f) {
-                a = true;
+              if (!companionFound) {
+                companionDiscountAvailable = true;
               }
             }
             case FEMALES, ELDERLIES -> {
-              LocalDate l = priceConfiguration.getToday();
-              DayOfWeek w = l.getDayOfWeek();
-              String x = t == DiscountTypes.FEMALES ? "女性割引" : "シニア割引";
-              if (w == DayOfWeek.WEDNESDAY
-                  && (l.getMonth() != Month.JANUARY || 3 < l.getDayOfMonth())) {
-                bp.put(i, d20);
-                dp.put(
-                    i, new ArrayList<>(List.of(new Discount(d80, DiscountDescription.of(x, t)))));
+              LocalDate today = priceConfiguration.getToday();
+              DayOfWeek todayDayOfWeek = today.getDayOfWeek();
+              String discountTitle = discountType == DiscountTypes.FEMALES ? "女性割引" : "シニア割引";
+              if (todayDayOfWeek == DayOfWeek.WEDNESDAY
+                  && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
+                visitorToPrice.put(visitorId, eightyPercentOfBasePrice);
+                visitorToDiscount.put(
+                    visitorId,
+                    new ArrayList<>(
+                        List.of(
+                            new Discount(
+                                twentyPercentOfBasePrice,
+                                DiscountDescription.of(discountTitle, discountType)))));
               } else {
-                bp.put(i, p);
-                dp.put(i, new ArrayList<>());
+                visitorToPrice.put(visitorId, basePrice);
+                visitorToDiscount.put(visitorId, new ArrayList<>());
               }
             }
           }
         }
       }
     }
-    for (Visitor v : visitorGroup) {
-      PersonalStamp s = v.personalStamp();
-      if (s != null && s.count() == 10) {
-        Price c = bp.get(v.id());
-        if (c != null && d50.value() < c.value()) {
-          Price n = new Price(c.value() - 200);
-          boolean b = d50.value() < n.value();
-          bp.put(v.id(), b ? n : d50);
-          dp.computeIfAbsent(v.id(), _ -> new ArrayList<>())
+    for (Visitor visitor : visitorGroup) {
+      PersonalStamp personalStamp = visitor.personalStamp();
+      if (personalStamp != null && personalStamp.count() == 10) {
+        Price price = visitorToPrice.get(visitor.id());
+        if (price != null && halfOfBasePrice.value() < price.value()) {
+          Price discountedPrice = new Price(price.value() - 200);
+          boolean fullyDiscounted = halfOfBasePrice.value() < discountedPrice.value();
+          visitorToPrice.put(visitor.id(), fullyDiscounted ? discountedPrice : halfOfBasePrice);
+          visitorToDiscount
+              .computeIfAbsent(visitor.id(), _ -> new ArrayList<>())
               .add(
                   new Discount(
-                      b ? new Price(200) : new Price(c.value() - d50.value()),
-                      DiscountDescription.of("スタンプ割引", s)));
+                      fullyDiscounted
+                          ? new Price(200)
+                          : new Price(price.value() - halfOfBasePrice.value()),
+                      DiscountDescription.of("スタンプ割引", personalStamp)));
         }
       }
-      for (OptionalDiscount.Offered od : visitorGroup.allOfferedOptionalDiscounts()) {
-        if (!od.canApplyTo(v)) {
+      for (OptionalDiscount.Offered discountMethod : visitorGroup.allOfferedOptionalDiscounts()) {
+        if (!discountMethod.canApplyTo(visitor)) {
           continue;
         }
-        OptionalDiscount o = od.discount();
-        List<Discount> ds = dp.computeIfAbsent(v.id(), _ -> new ArrayList<>());
-        if (ds.stream()
+        OptionalDiscount optionalDiscount = discountMethod.discount();
+        List<Discount> discountList =
+            visitorToDiscount.computeIfAbsent(visitor.id(), _ -> new ArrayList<>());
+        if (discountList.stream()
             .map(u -> u.description().getSource())
             .map(Object::getClass)
-            .anyMatch(c -> c.isInstance(o))) {
+            .anyMatch(c -> c.isInstance(optionalDiscount))) {
           continue;
         }
-        switch (o) {
-          case ShoppingReceipt r -> {
-            Price c = bp.get(v.id());
-            if (c != null && d50.value() < c.value() && 5000 <= r.totalPayment()) {
-              Price n = new Price(c.value() - 100);
-              boolean b = d50.value() < n.value();
-              bp.put(v.id(), b ? n : d50);
-              ds.add(
+        switch (optionalDiscount) {
+          case ShoppingReceipt receipt -> {
+            Price currentPrice = visitorToPrice.get(visitor.id());
+            if (currentPrice != null
+                && halfOfBasePrice.value() < currentPrice.value()
+                && 5000 <= receipt.totalPayment()) {
+              Price discountedPrice = new Price(currentPrice.value() - 100);
+              boolean higherThanHalfOfBasePrice = halfOfBasePrice.value() < discountedPrice.value();
+              visitorToPrice.put(
+                  visitor.id(), higherThanHalfOfBasePrice ? discountedPrice : halfOfBasePrice);
+              discountList.add(
                   new Discount(
-                      b ? new Price(100) : new Price(c.value() - d50.value()),
-                      DiscountDescription.of("商品購入割引", o)));
+                      higherThanHalfOfBasePrice
+                          ? new Price(100)
+                          : new Price(currentPrice.value() - halfOfBasePrice.value()),
+                      DiscountDescription.of("商品購入割引", optionalDiscount)));
             }
           }
-          case InternetPremiumMember i -> {
-            Price c = bp.get(v.id());
-            if (c != null
-                && d50.value() < c.value()
-                && internetPremiumMembersDatabase.isValidMemberId(i.userId())) {
-              Price n = new Price(c.value() - 200);
-              boolean b = d50.value() < n.value();
-              bp.put(v.id(), b ? n : d50);
-              ds.add(
+          case InternetPremiumMember internetPremiumMember -> {
+            Price currentPrice = visitorToPrice.get(visitor.id());
+            if (currentPrice != null
+                && halfOfBasePrice.value() < currentPrice.value()
+                && internetPremiumMembersDatabase.isValidMemberId(internetPremiumMember.userId())) {
+              Price discountedPrice = new Price(currentPrice.value() - 200);
+              boolean higherThanHalfOfBasePrice = halfOfBasePrice.value() < discountedPrice.value();
+              visitorToPrice.put(
+                  visitor.id(), higherThanHalfOfBasePrice ? discountedPrice : halfOfBasePrice);
+              discountList.add(
                   new Discount(
-                      b ? new Price(200) : new Price(c.value() - d50.value()),
-                      DiscountDescription.of("インターネットプレミアム会員割引", o)));
+                      higherThanHalfOfBasePrice
+                          ? new Price(200)
+                          : new Price(currentPrice.value() - halfOfBasePrice.value()),
+                      DiscountDescription.of("インターネットプレミアム会員割引", optionalDiscount)));
             }
           }
-          case DiscountTicket t -> {
-            Price c = bp.get(v.id());
-            if (eventDatabase.isValidDiscountTicket(t)
-                && c != null
-                && d50.value() < c.value()
-                && t.price().value() < c.value()) {
-              Price n = new Price(c.value() - t.price().value());
-              boolean b = d50.value() < n.value();
-              bp.put(v.id(), b ? n : d50);
-              ds.add(
+          case DiscountTicket discountTicket -> {
+            Price currentPrice = visitorToPrice.get(visitor.id());
+            if (eventDatabase.isValidDiscountTicket(discountTicket)
+                && currentPrice != null
+                && halfOfBasePrice.value() < currentPrice.value()
+                && discountTicket.price().value() < currentPrice.value()) {
+              Price discountedPrice =
+                  new Price(currentPrice.value() - discountTicket.price().value());
+              boolean higherThanHalfOfBasePrice = halfOfBasePrice.value() < discountedPrice.value();
+              visitorToPrice.put(
+                  visitor.id(), higherThanHalfOfBasePrice ? discountedPrice : halfOfBasePrice);
+              discountList.add(
                   new Discount(
-                      b ? t.price() : new Price(c.value() - d50.value()),
-                      DiscountDescription.of("割引チケット", t)));
+                      higherThanHalfOfBasePrice
+                          ? discountTicket.price()
+                          : new Price(currentPrice.value() - halfOfBasePrice.value()),
+                      DiscountDescription.of("割引チケット", discountTicket)));
             }
           }
           default -> {}
         }
       }
     }
-    List<Audience> l = new ArrayList<>();
-    for (Visitor v : visitorGroup) {
-      UUID id = v.id();
-      PersonalStamp s = v.personalStamp();
-      PersonalStamp n =
-          s == null || s.count() == 10 ? new PersonalStamp(1) : new PersonalStamp(s.count() + 1);
-      Price c = bp.get(id);
-      if (c == null) {
+    List<Audience> audienceList = new ArrayList<>();
+    for (Visitor visitor : visitorGroup) {
+      UUID visitorId = visitor.id();
+      PersonalStamp currentPersonalStamp = visitor.personalStamp();
+      PersonalStamp newPersonalStamp =
+          currentPersonalStamp == null || currentPersonalStamp.count() == 10
+              ? new PersonalStamp(1)
+              : new PersonalStamp(currentPersonalStamp.count() + 1);
+      Price finalPrice = visitorToPrice.get(visitorId);
+      if (finalPrice == null) {
         //noinspection preview
-        throw new IllegalStateException(STR."error \{id} not found in \{bp.keySet()}");
+        throw new IllegalStateException(
+            STR."error \{visitorId} not found in \{visitorToPrice.keySet()}");
       }
-      List<Discount> d = dp.get(id);
-      if (d == null) {
+      List<Discount> discountDetails = visitorToDiscount.get(visitorId);
+      if (discountDetails == null) {
         //noinspection preview
-        throw new IllegalStateException(STR."error \{id} not found in \{dp.keySet()}");
+        throw new IllegalStateException(
+            STR."error \{visitorId} not found in \{visitorToDiscount.keySet()}");
       }
-      Audience ad = new Audience(id, n, c, d);
-      l.add(ad);
+      Audience ad = new Audience(visitorId, newPersonalStamp, finalPrice, discountDetails);
+      audienceList.add(ad);
     }
-    return List.copyOf(l);
+    return List.copyOf(audienceList);
   }
 }
