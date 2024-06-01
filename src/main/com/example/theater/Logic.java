@@ -238,11 +238,11 @@ public class Logic {
       }
     }
     List<Audience> audienceList = new ArrayList<>();
-    add(visitorGroup, visitorToPrice, visitorToDiscount, audienceList);
+    compileAudienceList(visitorGroup, visitorToPrice, visitorToDiscount, audienceList);
     return List.copyOf(audienceList);
   }
 
-  private static void add(
+  private static void compileAudienceList(
       @NotNull VisitorGroup visitorGroup,
       Map<UUID, Price> visitorToPrice,
       Map<UUID, List<Discount>> visitorToDiscount,
