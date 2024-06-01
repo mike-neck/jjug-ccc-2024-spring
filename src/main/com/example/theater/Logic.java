@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 public class Logic {
 
@@ -237,6 +238,13 @@ public class Logic {
         }
       }
     }
+    return compileAudienceList(visitorGroup, visitorToPrice, visitorToDiscount);
+  }
+
+  private static @Unmodifiable List<Audience> compileAudienceList(
+      @NotNull VisitorGroup visitorGroup,
+      Map<UUID, Price> visitorToPrice,
+      Map<UUID, List<Discount>> visitorToDiscount) {
     List<Audience> audienceList = new ArrayList<>();
     compileAudienceList(visitorGroup, visitorToPrice, visitorToDiscount, audienceList);
     return List.copyOf(audienceList);
