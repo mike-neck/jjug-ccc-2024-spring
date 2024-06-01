@@ -242,10 +242,11 @@ public class Logic {
     return List.copyOf(audienceList);
   }
 
-  private static List<Audience> compileAudienceList(
+  private static void compileAudienceList(
       @NotNull VisitorGroup visitorGroup,
       Map<UUID, Price> visitorToPrice,
-      Map<UUID, List<Discount>> visitorToDiscount) {
+      Map<UUID, List<Discount>> visitorToDiscount,
+      List<Audience> audienceList) {
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
       PersonalStamp currentPersonalStamp = visitor.personalStamp();
