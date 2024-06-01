@@ -246,15 +246,6 @@ public class Logic {
       Map<UUID, Price> visitorToPrice,
       Map<UUID, List<Discount>> visitorToDiscount) {
     List<Audience> audienceList = new ArrayList<>();
-    compileAudienceList(visitorGroup, visitorToPrice, visitorToDiscount, audienceList);
-    return List.copyOf(audienceList);
-  }
-
-  private static void compileAudienceList(
-      @NotNull VisitorGroup visitorGroup,
-      Map<UUID, Price> visitorToPrice,
-      Map<UUID, List<Discount>> visitorToDiscount,
-      List<Audience> audienceList) {
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
       PersonalStamp currentPersonalStamp = visitor.personalStamp();
@@ -277,5 +268,6 @@ public class Logic {
       Audience ad = new Audience(visitorId, newPersonalStamp, finalPrice, discountDetails);
       audienceList.add(ad);
     }
+    return List.copyOf(audienceList);
   }
 }
