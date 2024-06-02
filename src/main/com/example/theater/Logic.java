@@ -238,13 +238,12 @@ public class Logic {
         }
       }
     }
-    return compileAudienceList(visitorGroup, visitorToPrice, visitorToDiscount);
+    return compileAudienceList(
+        visitorGroup, new VisitorFeeDetails(visitorToPrice, visitorToDiscount));
   }
 
   private static @Unmodifiable List<Audience> compileAudienceList(
-      @NotNull VisitorGroup visitorGroup,
-      Map<UUID, Price> visitorToPrice,
-      Map<UUID, List<Discount>> visitorToDiscount) {
+      @NotNull VisitorGroup visitorGroup, VisitorFeeDetails visitorFeeDetails) {
     List<Audience> audienceList = new ArrayList<>();
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
@@ -253,17 +252,19 @@ public class Logic {
           currentPersonalStamp == null || currentPersonalStamp.count() == 10
               ? new PersonalStamp(1)
               : new PersonalStamp(currentPersonalStamp.count() + 1);
-      Price finalPrice = visitorToPrice.get(visitorId);
+      Price finalPrice = visitorFeeDetails.visitorToPrice().get(visitorId);
       if (finalPrice == null) {
         //noinspection preview
         throw new IllegalStateException(
-            STR."error \{visitorId} not found in \{visitorToPrice.keySet()}");
+            STR."error \{visitorId} not found in \{visitorFeeDetails.visitorToPrice().keySet()}");
       }
-      List<Discount> discountDetails = visitorToDiscount.get(visitorId);
+      List<Discount> discountDetails = visitorFeeDetails.visitorToDiscount().get(visitorId);
       if (discountDetails == null) {
         //noinspection preview
         throw new IllegalStateException(
-            STR."error \{visitorId} not found in \{visitorToDiscount.keySet()}");
+            STR."error \{
+                visitorId} not found in \{
+                visitorFeeDetails.visitorToDiscount().keySet()}");
       }
       Audience ad = new Audience(visitorId, newPersonalStamp, finalPrice, discountDetails);
       audienceList.add(ad);
