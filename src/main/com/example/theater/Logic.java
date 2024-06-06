@@ -1,7 +1,5 @@
 package com.example.theater;
 
-import static java.lang.StringTemplate.STR;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
@@ -253,21 +251,10 @@ public class Logic {
               ? new PersonalStamp(1)
               : new PersonalStamp(currentPersonalStamp.count() + 1);
       Price finalPrice = visitorFeeDetails.getPriceOrThrow(visitorId);
-      List<Discount> discountDetails = getDiscountListOrThrow(visitorFeeDetails, visitorId);
+      List<Discount> discountDetails = visitorFeeDetails.getDiscountListOrThrow(visitorId);
       Audience ad = new Audience(visitorId, newPersonalStamp, finalPrice, discountDetails);
       audienceList.add(ad);
     }
     return List.copyOf(audienceList);
-  }
-
-  private static @NotNull List<Discount> getDiscountListOrThrow(
-      @NotNull VisitorFeeDetails visitorFeeDetails, UUID visitorId) {
-    List<Discount> discountDetails = visitorFeeDetails.visitorToDiscount().get(visitorId);
-    if (discountDetails == null) {
-      //noinspection preview
-      throw new IllegalStateException(
-          STR."error \{visitorId} not found in \{visitorFeeDetails.visitorToDiscount().keySet()}");
-    }
-    return discountDetails;
   }
 }
