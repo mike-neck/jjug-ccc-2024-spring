@@ -252,7 +252,7 @@ public class Logic {
           currentPersonalStamp == null || currentPersonalStamp.count() == 10
               ? new PersonalStamp(1)
               : new PersonalStamp(currentPersonalStamp.count() + 1);
-      Price finalPrice = getPriceOrThrow(visitorFeeDetails, visitorId);
+      Price finalPrice = visitorFeeDetails.getPriceOrThrow(visitorId);
       List<Discount> discountDetails = visitorFeeDetails.visitorToDiscount().get(visitorId);
       if (discountDetails == null) {
         //noinspection preview
@@ -265,16 +265,5 @@ public class Logic {
       audienceList.add(ad);
     }
     return List.copyOf(audienceList);
-  }
-
-  private static @NotNull Price getPriceOrThrow(
-      @NotNull VisitorFeeDetails visitorFeeDetails, @NotNull UUID visitorId) {
-    Price finalPrice = visitorFeeDetails.visitorToPrice().get(visitorId);
-    if (finalPrice == null) {
-      //noinspection preview
-      throw new IllegalStateException(
-          STR."error \{visitorId} not found in \{visitorFeeDetails.visitorToPrice().keySet()}");
-    }
-    return finalPrice;
   }
 }
