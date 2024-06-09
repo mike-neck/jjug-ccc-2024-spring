@@ -245,19 +245,12 @@ public class Logic {
     List<Audience> audienceList = new ArrayList<>();
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
-      PersonalStamp newPersonalStamp = nextPersonalStamp(visitor);
+      PersonalStamp newPersonalStamp = visitor.nextPersonalStamp();
       Price finalPrice = visitorFeeDetails.getPriceOrThrow(visitorId);
       List<Discount> discountDetails = visitorFeeDetails.getDiscountListOrThrow(visitorId);
       Audience ad = new Audience(visitorId, newPersonalStamp, finalPrice, discountDetails);
       audienceList.add(ad);
     }
     return List.copyOf(audienceList);
-  }
-
-  private static @NotNull PersonalStamp nextPersonalStamp(@NotNull Visitor visitor) {
-    PersonalStamp currentPersonalStamp = visitor.personalStamp();
-    return currentPersonalStamp == null || currentPersonalStamp.count() == 10
-        ? new PersonalStamp(1)
-        : new PersonalStamp(currentPersonalStamp.count() + 1);
   }
 }

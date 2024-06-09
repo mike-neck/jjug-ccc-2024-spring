@@ -18,6 +18,14 @@ public record Visitor(
     this(id, discount, List.of(optionalDiscounts), null);
   }
 
+  @NotNull
+  PersonalStamp nextPersonalStamp() {
+    PersonalStamp currentPersonalStamp = personalStamp();
+    return currentPersonalStamp == null || currentPersonalStamp.count() == 10
+        ? new PersonalStamp(1)
+        : new PersonalStamp(currentPersonalStamp.count() + 1);
+  }
+
   @Override
   public @Nullable PersonalStamp personalStamp() {
     for (OptionalDiscount optionalDiscount : optionalDiscounts) {
