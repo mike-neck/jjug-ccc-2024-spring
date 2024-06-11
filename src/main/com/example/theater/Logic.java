@@ -147,6 +147,16 @@ public class Logic {
         }
       }
     }
+    applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount, halfOfBasePrice);
+    return compileAudienceList(
+        visitorGroup, new VisitorFeeDetails(visitorToPrice, visitorToDiscount));
+  }
+
+  private void applyOptionalDiscounts(
+      @NotNull VisitorGroup visitorGroup,
+      @NotNull Map<UUID, Price> visitorToPrice,
+      @NotNull Map<UUID, List<Discount>> visitorToDiscount,
+      @NotNull Price halfOfBasePrice) {
     for (Visitor visitor : visitorGroup) {
       PersonalStamp personalStamp = visitor.personalStamp();
       if (personalStamp != null && personalStamp.count() == 10) {
@@ -236,8 +246,6 @@ public class Logic {
         }
       }
     }
-    return compileAudienceList(
-        visitorGroup, new VisitorFeeDetails(visitorToPrice, visitorToDiscount));
   }
 
   private static @Unmodifiable List<Audience> compileAudienceList(
