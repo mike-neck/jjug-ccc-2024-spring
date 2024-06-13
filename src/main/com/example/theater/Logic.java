@@ -67,20 +67,7 @@ public class Logic {
                   companionVisitor.id(),
                   List.of(new Discount(basePrice, DiscountDescription.of("株主優待券", s))));
             }
-            List<Audience> result = new ArrayList<>();
-            for (Visitor companionVisitor : visitorGroup) {
-              PersonalStamp personalStamp = companionVisitor.personalStamp();
-              List<Discount> discountDetails =
-                  visitorToDiscount.computeIfAbsent(companionVisitor.id(), _ -> new ArrayList<>());
-              Audience audience =
-                  new Audience(
-                      companionVisitor.id(),
-                      personalStamp == null ? new PersonalStamp(0) : personalStamp,
-                      new Price(0),
-                      List.copyOf(discountDetails));
-              result.add(audience);
-            }
-            return List.copyOf(result);
+            break;
           } else {
             visitorToPrice.put(visitorId, basePrice);
             visitorToDiscount.put(visitorId, new ArrayList<>());
@@ -253,6 +240,7 @@ public class Logic {
     List<Audience> audienceList = new ArrayList<>();
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
+      // FIXME 株主優待券の場合にスタンプを増やさない
       PersonalStamp newPersonalStamp = visitor.nextPersonalStamp();
       Price finalPrice = visitorFeeDetails.getPriceOrThrow(visitorId);
       List<Discount> discountDetails = visitorFeeDetails.getDiscountListOrThrow(visitorId);
