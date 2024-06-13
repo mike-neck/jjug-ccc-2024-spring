@@ -113,7 +113,7 @@ class LogicTest {
   void singleShareHolderWithAnotherVisitors() {
     UUID visitor = UUID.randomUUID();
     VisitorGroup visitors =
-        new VisitorGroup(List.of(normalVisitor(0), shareHolder(visitor, -1), normalVisitor(-1)));
+        new VisitorGroup(List.of(normalVisitor(0), shareHolder(visitor, 1), normalVisitor(5)));
     Price basePrice = new Price(1000);
     Logic logic =
         new Logic(
@@ -134,7 +134,11 @@ class LogicTest {
                 audiences.stream()
                     .flatMap(a -> a.discountDetails().stream())
                     .map(Discount::price)
-                    .toList()));
+                    .toList()),
+        () ->
+            assertEquals(
+                Set.of(new PersonalStamp(0), new PersonalStamp(1), new PersonalStamp(5)),
+                audiences.stream().map(Audience::newPersonalStamp).collect(Collectors.toSet())));
   }
 
   @Test

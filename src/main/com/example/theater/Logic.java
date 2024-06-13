@@ -240,13 +240,26 @@ public class Logic {
     List<Audience> audienceList = new ArrayList<>();
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
-      // FIXME 株主優待券の場合にスタンプを増やさない
-      PersonalStamp newPersonalStamp = visitor.nextPersonalStamp();
       Price finalPrice = visitorFeeDetails.getPriceOrThrow(visitorId);
       List<Discount> discountDetails = visitorFeeDetails.getDiscountListOrThrow(visitorId);
+      PersonalStamp newPersonalStamp = personalStamp(discountDetails, visitor);
       Audience ad = new Audience(visitorId, newPersonalStamp, finalPrice, discountDetails);
       audienceList.add(ad);
     }
     return List.copyOf(audienceList);
+  }
+
+  static @NotNull PersonalStamp personalStamp(
+      @NotNull List<Discount> discountDetails, @NotNull Visitor visitor) {
+    if (discountDetails.stream()
+        .map(Discount::description)
+        .map(DiscountDescription::getSource)
+        .map(Object::getClass)
+        .anyMatch(ShareHolderTicket.class::equals)) {
+      PersonalStamp personalStamp = visitor.personalStamp();
+      return personalStamp == null ? new PersonalStamp(0) : personalStamp;
+    } else {
+      return visitor.nextPersonalStamp();
+    }
   }
 }
