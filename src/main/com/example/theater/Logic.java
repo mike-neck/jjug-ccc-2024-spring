@@ -40,6 +40,29 @@ public class Logic {
         new Price(basePrice.value() - eightyPercentOfBasePrice.value());
     Price halfOfBasePrice = new Price(basePrice.value() / 2);
 
+    calculateBasePrices(
+        visitorGroup,
+        companionDiscountAvailable,
+        visitorToPrice,
+        eightyPercentOfBasePrice,
+        visitorToDiscount,
+        twentyPercentOfBasePrice,
+        basePrice,
+        halfOfBasePrice);
+    applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount, halfOfBasePrice);
+    return compileAudienceList(
+        visitorGroup, new VisitorFeeDetails(visitorToPrice, visitorToDiscount));
+  }
+
+  private void calculateBasePrices(
+      @NotNull VisitorGroup visitorGroup,
+      boolean companionDiscountAvailable,
+      Map<UUID, Price> visitorToPrice,
+      Price eightyPercentOfBasePrice,
+      Map<UUID, List<Discount>> visitorToDiscount,
+      Price twentyPercentOfBasePrice,
+      Price basePrice,
+      Price halfOfBasePrice) {
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
       DiscountType discountTypeByVisitorProperties = visitor.discount();
@@ -134,9 +157,6 @@ public class Logic {
         }
       }
     }
-    applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount, halfOfBasePrice);
-    return compileAudienceList(
-        visitorGroup, new VisitorFeeDetails(visitorToPrice, visitorToDiscount));
   }
 
   private void applyOptionalDiscounts(
