@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 public class Logic {
@@ -80,7 +79,6 @@ public class Logic {
     Price twentyPercentOfBasePrice =
         new Price(fullPrice.value() - eightyPercentOfBasePrice.value());
     Price halfOfBasePrice = new Price(fullPrice.value() / 2);
-    @Nullable VisitorFeeDetails feeDetailsForShareHolder;
     if (discountTypeByVisitorProperties == null) {
       if (companionDiscountAvailable) {
         return new SelectedPrice(
@@ -98,7 +96,7 @@ public class Logic {
       if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
         if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(
             shareHolderTicket.id())) {
-          feeDetailsForShareHolder = new VisitorFeeDetails();
+          VisitorFeeDetails feeDetailsForShareHolder = new VisitorFeeDetails();
           for (Visitor companionVisitor : visitorGroup) {
             Price price = new Price(0);
             BasePrice bp =
