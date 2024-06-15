@@ -152,14 +152,8 @@ public class Logic {
 
   private void applyOptionalDiscounts(
       @NotNull VisitorGroup visitorGroup, @NotNull VisitorFeeDetails visitorFeeDetails) {
-    applyOptionalDiscounts(
-        visitorGroup, visitorFeeDetails.visitorToPrice(), visitorFeeDetails.visitorToDiscount());
-  }
-
-  private void applyOptionalDiscounts(
-      @NotNull VisitorGroup visitorGroup,
-      Map<UUID, Price> visitorToPrice,
-      Map<UUID, List<Discount>> visitorToDiscount) {
+    Map<UUID, Price> visitorToPrice = visitorFeeDetails.visitorToPrice();
+    Map<UUID, List<Discount>> visitorToDiscount = visitorFeeDetails.visitorToDiscount();
     Price basePrice = priceConfiguration.getBasePrice();
     Price halfOfBasePrice = new Price(basePrice.value() / 2);
     for (Visitor visitor : visitorGroup) {
@@ -253,7 +247,7 @@ public class Logic {
     }
   }
 
-  private static @Unmodifiable List<Audience> compileAudienceList(
+  private static @NotNull @Unmodifiable List<Audience> compileAudienceList(
       @NotNull VisitorGroup visitorGroup, VisitorFeeDetails visitorFeeDetails) {
     List<Audience> audienceList = new ArrayList<>();
     for (Visitor visitor : visitorGroup) {
