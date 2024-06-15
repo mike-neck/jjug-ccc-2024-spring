@@ -31,9 +31,7 @@ public class Logic {
   }
 
   public @NotNull List<Audience> calculateAdmissionFee(@NotNull VisitorGroup visitorGroup) {
-    VisitorFeeDetails visitorFeeDetails = createVisitorFeeDetails();
-    calculateBasePrices(
-        visitorGroup, visitorFeeDetails.visitorToPrice(), visitorFeeDetails.visitorToDiscount());
+    VisitorFeeDetails visitorFeeDetails = calculateBasePrices(visitorGroup);
     applyOptionalDiscounts(
         visitorGroup, visitorFeeDetails.visitorToPrice(), visitorFeeDetails.visitorToDiscount());
     return compileAudienceList(visitorGroup, visitorFeeDetails);
@@ -43,6 +41,13 @@ public class Logic {
     Map<UUID, Price> visitorToPrice = new HashMap<>();
     Map<UUID, List<Discount>> visitorToDiscount = new HashMap<>();
     return new VisitorFeeDetails(visitorToPrice, visitorToDiscount);
+  }
+
+  private @NotNull VisitorFeeDetails calculateBasePrices(@NotNull VisitorGroup visitorGroup) {
+    VisitorFeeDetails visitorFeeDetails = createVisitorFeeDetails();
+    calculateBasePrices(
+        visitorGroup, visitorFeeDetails.visitorToPrice(), visitorFeeDetails.visitorToDiscount());
+    return visitorFeeDetails;
   }
 
   private void calculateBasePrices(
