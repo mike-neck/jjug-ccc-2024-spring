@@ -76,15 +76,13 @@ public class Logic {
       boolean companionDiscountAvailable,
       VisitorFeeDetails visitorFeeDetails) {
     Price fullPrice = priceConfiguration.getBasePrice();
-    if (discountTypeByVisitorProperties == null) {
-      if (companionDiscountAvailable) {
-        return companionDiscountPrice(
-            visitorGroup,
-            companionDiscountAvailable,
-            visitorFeeDetails,
-            discountTypeByVisitorProperties,
-            fullPrice);
-      }
+    if (discountTypeByVisitorProperties == null && companionDiscountAvailable) {
+      return companionDiscountPrice(
+          visitorGroup,
+          companionDiscountAvailable,
+          visitorFeeDetails,
+          discountTypeByVisitorProperties,
+          fullPrice);
     } else {
       if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
         if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(
