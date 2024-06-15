@@ -64,13 +64,13 @@ public class Logic {
                           twentyPercentOfBasePrice,
                           DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES))));
           BasePrice bp = new BasePrice(price, discounts);
-          setBasePrice(visitorFeeDetails, visitorId, bp);
+          visitorFeeDetails.setBasePrice(visitorId, bp);
           companionDiscountAvailable = false;
         } else {
           Price price = basePrice;
           ArrayList<Discount> discounts = new ArrayList<>();
           BasePrice bp = new BasePrice(price, discounts);
-          setBasePrice(visitorFeeDetails, visitorId, bp);
+          visitorFeeDetails.setBasePrice(visitorId, bp);
         }
       } else {
         if (discountTypeByVisitorProperties instanceof ShareHolderTicket s) {
@@ -87,7 +87,7 @@ public class Logic {
             Price price = basePrice;
             ArrayList<Discount> discounts = new ArrayList<>();
             BasePrice bp = new BasePrice(price, discounts);
-            setBasePrice(visitorFeeDetails, visitorId, bp);
+            visitorFeeDetails.setBasePrice(visitorId, bp);
           }
         } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
           switch (discountType) {
@@ -99,7 +99,7 @@ public class Logic {
                           new Discount(
                               halfOfBasePrice, DiscountDescription.of("子供割引", discountType))));
               BasePrice bp = new BasePrice(price, discounts);
-              setBasePrice(visitorFeeDetails, visitorId, bp);
+              visitorFeeDetails.setBasePrice(visitorId, bp);
             }
             case DISABILITIES -> {
               Price price = eightyPercentOfBasePrice;
@@ -110,7 +110,7 @@ public class Logic {
                               twentyPercentOfBasePrice,
                               DiscountDescription.of("障がい者割引", discountType))));
               BasePrice bp = new BasePrice(price, discounts);
-              setBasePrice(visitorFeeDetails, visitorId, bp);
+              visitorFeeDetails.setBasePrice(visitorId, bp);
 
               boolean companionFound = false;
               for (UUID companionVisitorId :
@@ -140,12 +140,12 @@ public class Logic {
                                 twentyPercentOfBasePrice,
                                 DiscountDescription.of(discountTitle, discountType))));
                 BasePrice bp = new BasePrice(price, discounts);
-                setBasePrice(visitorFeeDetails, visitorId, bp);
+                visitorFeeDetails.setBasePrice(visitorId, bp);
               } else {
                 Price price = basePrice;
                 ArrayList<Discount> discounts = new ArrayList<>();
                 BasePrice bp = new BasePrice(price, discounts);
-                setBasePrice(visitorFeeDetails, visitorId, bp);
+                visitorFeeDetails.setBasePrice(visitorId, bp);
               }
             }
           }
@@ -153,14 +153,6 @@ public class Logic {
       }
     }
     return visitorFeeDetails;
-  }
-
-  private static void setBasePrice(
-      @NotNull VisitorFeeDetails visitorFeeDetails,
-      @NotNull UUID visitorId,
-      @NotNull BasePrice bp) {
-    visitorFeeDetails.visitorToPrice().put(visitorId, bp.price());
-    visitorFeeDetails.visitorToDiscount().put(visitorId, bp.discounts());
   }
 
   private void applyOptionalDiscounts(

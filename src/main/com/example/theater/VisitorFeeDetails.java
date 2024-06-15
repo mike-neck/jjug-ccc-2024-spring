@@ -8,6 +8,11 @@ import org.jetbrains.annotations.NotNull;
 public record VisitorFeeDetails(
     Map<UUID, Price> visitorToPrice, Map<UUID, List<Discount>> visitorToDiscount) {
 
+  void setBasePrice(@NotNull UUID visitorId, @NotNull BasePrice bp) {
+    visitorToPrice().put(visitorId, bp.price());
+    visitorToDiscount().put(visitorId, bp.discounts());
+  }
+
   @NotNull
   List<Discount> getDiscountListOrThrow(UUID visitorId) {
     List<Discount> discountDetails = visitorToDiscount().get(visitorId);
