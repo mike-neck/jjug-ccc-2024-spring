@@ -1,5 +1,6 @@
 package com.example.theater;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -7,6 +8,10 @@ import org.jetbrains.annotations.NotNull;
 
 public record VisitorFeeDetails(
     Map<UUID, Price> visitorToPrice, Map<UUID, List<Discount>> visitorToDiscount) {
+
+  public VisitorFeeDetails() {
+    this(new HashMap<>(), new HashMap<>());
+  }
 
   void setBasePrice(@NotNull UUID visitorId, @NotNull BasePrice bp) {
     visitorToPrice().put(visitorId, bp.price());

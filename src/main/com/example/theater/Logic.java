@@ -52,6 +52,7 @@ public class Logic {
     Price halfOfBasePrice = new Price(fullPrice.value() / 2);
 
     boolean companionDiscountAvailable = false;
+    @Nullable VisitorFeeDetails feeDetailsForShareHolder = null;
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
       DiscountType discountTypeByVisitorProperties = visitor.discount();
@@ -75,6 +76,7 @@ public class Logic {
         if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
           if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(
               shareHolderTicket.id())) {
+            feeDetailsForShareHolder = new VisitorFeeDetails();
             for (Visitor companionVisitor : visitorGroup) {
               Price price = new Price(0);
               BasePrice bp =
@@ -83,9 +85,10 @@ public class Logic {
                       List.of(
                           new Discount(
                               fullPrice, DiscountDescription.of("株主優待券", shareHolderTicket))));
-              visitorFeeDetails.setBasePrice(companionVisitor.id(), bp);
+              feeDetailsForShareHolder.setBasePrice(companionVisitor.id(), bp);
             }
-            break;
+            basePrice = null;
+            companionDiscountAvailable = companionDiscountAvailable;
           } else {
             basePrice = defaultBasePrice(fullPrice);
             companionDiscountAvailable = companionDiscountAvailable;
@@ -151,6 +154,9 @@ public class Logic {
             }
           }
         }
+      }
+      if (feeDetailsForShareHolder != null) {
+        return feeDetailsForShareHolder;
       }
       if (basePrice != null) {
         visitorFeeDetails.setBasePrice(visitorId, basePrice);
