@@ -1,5 +1,5 @@
 package com.example.theater;
 
-import java.util.ArrayList;
+import java.util.List;
 
-record BasePrice(Price price, ArrayList<Discount> discounts) {}
+record BasePrice(Price price, List<Discount> discounts) {}

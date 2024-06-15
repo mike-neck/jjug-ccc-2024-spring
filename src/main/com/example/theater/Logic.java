@@ -79,8 +79,8 @@ public class Logic {
               Price price = new Price(0);
               List<Discount> discounts =
                   List.of(new Discount(basePrice, DiscountDescription.of("株主優待券", s)));
-              visitorFeeDetails.visitorToPrice().put(companionVisitor.id(), price);
-              visitorFeeDetails.visitorToDiscount().put(companionVisitor.id(), discounts);
+              BasePrice bp = new BasePrice(price, discounts);
+              visitorFeeDetails.setBasePrice(companionVisitor.id(), bp);
             }
             break;
           } else {
