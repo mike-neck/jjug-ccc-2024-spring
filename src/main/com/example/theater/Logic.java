@@ -72,13 +72,17 @@ public class Logic {
           companionDiscountAvailable = companionDiscountAvailable;
         }
       } else {
-        if (discountTypeByVisitorProperties instanceof ShareHolderTicket s) {
-          if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(s.id())) {
+        if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
+          if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(
+              shareHolderTicket.id())) {
             for (Visitor companionVisitor : visitorGroup) {
               Price price = new Price(0);
               BasePrice bp =
                   new BasePrice(
-                      price, List.of(new Discount(fullPrice, DiscountDescription.of("株主優待券", s))));
+                      price,
+                      List.of(
+                          new Discount(
+                              fullPrice, DiscountDescription.of("株主優待券", shareHolderTicket))));
               visitorFeeDetails.setBasePrice(companionVisitor.id(), bp);
             }
             break;
