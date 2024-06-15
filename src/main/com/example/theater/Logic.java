@@ -85,16 +85,15 @@ public class Logic {
           fullPrice);
     }
 
-    if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
-      if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(
-          shareHolderTicket.id())) {
-        return shareHolderPrice(
-            visitorGroup,
-            companionDiscountAvailable,
-            visitorFeeDetails,
-            shareHolderTicket,
-            fullPrice);
-      }
+    if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket
+        && publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(
+            shareHolderTicket.id())) {
+      return shareHolderPrice(
+          visitorGroup,
+          companionDiscountAvailable,
+          visitorFeeDetails,
+          shareHolderTicket,
+          fullPrice);
     } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
       switch (discountType) {
         case CHILD -> {
