@@ -69,6 +69,7 @@ public class Logic {
           companionDiscountAvailable = false;
         } else {
           basePrice = defaultBasePrice(fullPrice);
+          companionDiscountAvailable = companionDiscountAvailable;
         }
       } else {
         if (discountTypeByVisitorProperties instanceof ShareHolderTicket s) {
@@ -83,6 +84,7 @@ public class Logic {
             break;
           } else {
             basePrice = defaultBasePrice(fullPrice);
+            companionDiscountAvailable = companionDiscountAvailable;
           }
         } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
           switch (discountType) {
@@ -94,6 +96,7 @@ public class Logic {
                           List.of(
                               new Discount(
                                   halfOfBasePrice, DiscountDescription.of("子供割引", discountType)))));
+              companionDiscountAvailable = companionDiscountAvailable;
             }
             case DISABILITIES -> {
               ArrayList<Discount> discounts =
@@ -118,6 +121,8 @@ public class Logic {
               }
               if (!companionFound) {
                 companionDiscountAvailable = true;
+              } else {
+                companionDiscountAvailable = companionDiscountAvailable;
               }
             }
             case FEMALES, ELDERLIES -> {
@@ -134,8 +139,10 @@ public class Logic {
                                 new Discount(
                                     twentyPercentOfBasePrice,
                                     DiscountDescription.of(discountTitle, discountType)))));
+                companionDiscountAvailable = companionDiscountAvailable;
               } else {
                 basePrice = defaultBasePrice(fullPrice);
+                companionDiscountAvailable = companionDiscountAvailable;
               }
             }
           }
