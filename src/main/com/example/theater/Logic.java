@@ -32,8 +32,7 @@ public class Logic {
 
   public @NotNull List<Audience> calculateAdmissionFee(@NotNull VisitorGroup visitorGroup) {
     VisitorFeeDetails visitorFeeDetails = calculateBasePrices(visitorGroup);
-    applyOptionalDiscounts(
-        visitorGroup, visitorFeeDetails.visitorToPrice(), visitorFeeDetails.visitorToDiscount());
+    applyOptionalDiscounts(visitorGroup, visitorFeeDetails);
     return compileAudienceList(visitorGroup, visitorFeeDetails);
   }
 
@@ -149,6 +148,12 @@ public class Logic {
       }
     }
     return visitorFeeDetails;
+  }
+
+  private void applyOptionalDiscounts(
+      @NotNull VisitorGroup visitorGroup, @NotNull VisitorFeeDetails visitorFeeDetails) {
+    applyOptionalDiscounts(
+        visitorGroup, visitorFeeDetails.visitorToPrice(), visitorFeeDetails.visitorToDiscount());
   }
 
   private void applyOptionalDiscounts(
