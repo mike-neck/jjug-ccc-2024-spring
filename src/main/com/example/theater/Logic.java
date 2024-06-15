@@ -94,7 +94,9 @@ public class Logic {
           visitorFeeDetails,
           shareHolderTicket,
           fullPrice);
-    } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
+    }
+
+    if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
       switch (discountType) {
         case CHILD -> {
           return childrenPrice(
