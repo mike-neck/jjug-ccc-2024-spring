@@ -56,20 +56,18 @@ public class Logic {
       DiscountType discountTypeByVisitorProperties = visitor.discount();
       if (discountTypeByVisitorProperties == null) {
         if (companionDiscountAvailable) {
-          Price price = eightyPercentOfBasePrice;
-          ArrayList<Discount> discounts =
-              new ArrayList<>(
-                  List.of(
-                      new Discount(
-                          twentyPercentOfBasePrice,
-                          DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES))));
-          BasePrice bp = new BasePrice(price, discounts);
+          BasePrice bp =
+              new BasePrice(
+                  eightyPercentOfBasePrice,
+                  new ArrayList<>(
+                      List.of(
+                          new Discount(
+                              twentyPercentOfBasePrice,
+                              DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES)))));
           visitorFeeDetails.setBasePrice(visitorId, bp);
           companionDiscountAvailable = false;
         } else {
-          Price price = basePrice;
-          ArrayList<Discount> discounts = new ArrayList<>();
-          BasePrice bp = new BasePrice(price, discounts);
+          BasePrice bp = new BasePrice(basePrice, new ArrayList<>());
           visitorFeeDetails.setBasePrice(visitorId, bp);
         }
       } else {
@@ -77,39 +75,36 @@ public class Logic {
           if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(s.id())) {
             for (Visitor companionVisitor : visitorGroup) {
               Price price = new Price(0);
-              List<Discount> discounts =
-                  List.of(new Discount(basePrice, DiscountDescription.of("株主優待券", s)));
-              BasePrice bp = new BasePrice(price, discounts);
+              BasePrice bp =
+                  new BasePrice(
+                      price, List.of(new Discount(basePrice, DiscountDescription.of("株主優待券", s))));
               visitorFeeDetails.setBasePrice(companionVisitor.id(), bp);
             }
             break;
           } else {
-            Price price = basePrice;
-            ArrayList<Discount> discounts = new ArrayList<>();
-            BasePrice bp = new BasePrice(price, discounts);
+            BasePrice bp = new BasePrice(basePrice, new ArrayList<>());
             visitorFeeDetails.setBasePrice(visitorId, bp);
           }
         } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
           switch (discountType) {
             case CHILD -> {
-              Price price = halfOfBasePrice;
-              ArrayList<Discount> discounts =
-                  new ArrayList<>(
-                      List.of(
-                          new Discount(
-                              halfOfBasePrice, DiscountDescription.of("子供割引", discountType))));
-              BasePrice bp = new BasePrice(price, discounts);
+              BasePrice bp =
+                  new BasePrice(
+                      halfOfBasePrice,
+                      new ArrayList<>(
+                          List.of(
+                              new Discount(
+                                  halfOfBasePrice, DiscountDescription.of("子供割引", discountType)))));
               visitorFeeDetails.setBasePrice(visitorId, bp);
             }
             case DISABILITIES -> {
-              Price price = eightyPercentOfBasePrice;
               ArrayList<Discount> discounts =
                   new ArrayList<>(
                       List.of(
                           new Discount(
                               twentyPercentOfBasePrice,
                               DiscountDescription.of("障がい者割引", discountType))));
-              BasePrice bp = new BasePrice(price, discounts);
+              BasePrice bp = new BasePrice(eightyPercentOfBasePrice, discounts);
               visitorFeeDetails.setBasePrice(visitorId, bp);
 
               boolean companionFound = false;
@@ -117,7 +112,9 @@ public class Logic {
                   Set.copyOf(visitorFeeDetails.visitorToPrice().keySet())) {
                 if (basePrice.equals(visitorFeeDetails.visitorToPrice().get(companionVisitorId))) {
                   companionFound = true;
-                  visitorFeeDetails.visitorToPrice().put(companionVisitorId, price);
+                  visitorFeeDetails
+                      .visitorToPrice()
+                      .put(companionVisitorId, eightyPercentOfBasePrice);
                   visitorFeeDetails.visitorToDiscount().put(companionVisitorId, discounts);
                   break;
                 }
@@ -132,19 +129,17 @@ public class Logic {
               String discountTitle = discountType == DiscountTypes.FEMALES ? "女性割引" : "シニア割引";
               if (todayDayOfWeek == DayOfWeek.WEDNESDAY
                   && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
-                Price price = eightyPercentOfBasePrice;
-                ArrayList<Discount> discounts =
-                    new ArrayList<>(
-                        List.of(
-                            new Discount(
-                                twentyPercentOfBasePrice,
-                                DiscountDescription.of(discountTitle, discountType))));
-                BasePrice bp = new BasePrice(price, discounts);
+                BasePrice bp =
+                    new BasePrice(
+                        eightyPercentOfBasePrice,
+                        new ArrayList<>(
+                            List.of(
+                                new Discount(
+                                    twentyPercentOfBasePrice,
+                                    DiscountDescription.of(discountTitle, discountType)))));
                 visitorFeeDetails.setBasePrice(visitorId, bp);
               } else {
-                Price price = basePrice;
-                ArrayList<Discount> discounts = new ArrayList<>();
-                BasePrice bp = new BasePrice(price, discounts);
+                BasePrice bp = new BasePrice(basePrice, new ArrayList<>());
                 visitorFeeDetails.setBasePrice(visitorId, bp);
               }
             }
