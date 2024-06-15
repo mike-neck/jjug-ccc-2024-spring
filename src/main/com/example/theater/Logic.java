@@ -52,11 +52,11 @@ public class Logic {
     Price halfOfBasePrice = new Price(fullPrice.value() / 2);
 
     boolean companionDiscountAvailable = false;
-    @Nullable VisitorFeeDetails feeDetailsForShareHolder = null;
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
       DiscountType discountTypeByVisitorProperties = visitor.discount();
       @Nullable BasePrice basePrice = null;
+      @Nullable VisitorFeeDetails feeDetailsForShareHolder = null;
       if (discountTypeByVisitorProperties == null) {
         if (companionDiscountAvailable) {
           basePrice =
