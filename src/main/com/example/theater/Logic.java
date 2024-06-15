@@ -35,6 +35,20 @@ public class Logic {
     Map<UUID, List<Discount>> visitorToDiscount = new HashMap<>();
     boolean companionDiscountAvailable = false;
 
+    calculateBasePrices(
+        visitorGroup, companionDiscountAvailable, visitorToPrice, visitorToDiscount);
+    Price basePrice1 = priceConfiguration.getBasePrice();
+    Price halfOfBasePrice1 = new Price(basePrice1.value() / 2);
+    applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount, halfOfBasePrice1);
+    return compileAudienceList(
+        visitorGroup, new VisitorFeeDetails(visitorToPrice, visitorToDiscount));
+  }
+
+  private void calculateBasePrices(
+      @NotNull VisitorGroup visitorGroup,
+      boolean companionDiscountAvailable,
+      Map<UUID, Price> visitorToPrice,
+      Map<UUID, List<Discount>> visitorToDiscount) {
     Price basePrice = priceConfiguration.getBasePrice();
     Price eightyPercentOfBasePrice = new Price(basePrice.value() * 4 / 5);
     Price twentyPercentOfBasePrice =
@@ -49,11 +63,6 @@ public class Logic {
         twentyPercentOfBasePrice,
         basePrice,
         halfOfBasePrice);
-    Price basePrice1 = priceConfiguration.getBasePrice();
-    Price halfOfBasePrice1 = new Price(basePrice1.value() / 2);
-    applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount, halfOfBasePrice1);
-    return compileAudienceList(
-        visitorGroup, new VisitorFeeDetails(visitorToPrice, visitorToDiscount));
   }
 
   private void calculateBasePrices(
