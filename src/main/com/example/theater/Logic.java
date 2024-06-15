@@ -172,9 +172,6 @@ public class Logic {
         defaultBasePrice(priceConfiguration.getBasePrice()), null, companionDiscountAvailable);
   }
 
-  private record SelectedPrice(
-      BasePrice basePrice, VisitorFeeDetails feeDetailsForShareHolder, boolean companionDiscount) {}
-
   private static @NotNull BasePrice defaultBasePrice(Price basePrice) {
     return new BasePrice(basePrice, new ArrayList<>());
   }
