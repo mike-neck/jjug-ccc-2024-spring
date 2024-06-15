@@ -80,7 +80,6 @@ public class Logic {
     Price twentyPercentOfBasePrice =
         new Price(fullPrice.value() - eightyPercentOfBasePrice.value());
     Price halfOfBasePrice = new Price(fullPrice.value() / 2);
-    @Nullable BasePrice basePrice;
     @Nullable VisitorFeeDetails feeDetailsForShareHolder;
     if (discountTypeByVisitorProperties == null) {
       if (companionDiscountAvailable) {
@@ -132,7 +131,6 @@ public class Logic {
                         new Discount(
                             twentyPercentOfBasePrice,
                             DiscountDescription.of("障がい者割引", discountType))));
-            basePrice = new BasePrice(eightyPercentOfBasePrice, discounts);
 
             boolean companionFound = false;
             for (UUID companionVisitorId :
@@ -147,7 +145,9 @@ public class Logic {
               }
             }
             return new SelectedPrice(
-                basePrice, null, !companionFound || companionDiscountAvailable);
+                new BasePrice(eightyPercentOfBasePrice, discounts),
+                null,
+                !companionFound || companionDiscountAvailable);
           }
           case FEMALES, ELDERLIES -> {
             LocalDate today = priceConfiguration.getToday();
@@ -155,15 +155,16 @@ public class Logic {
             String discountTitle = discountType == DiscountTypes.FEMALES ? "女性割引" : "シニア割引";
             if (todayDayOfWeek == DayOfWeek.WEDNESDAY
                 && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
-              basePrice =
+              return new SelectedPrice(
                   new BasePrice(
                       eightyPercentOfBasePrice,
                       new ArrayList<>(
                           List.of(
                               new Discount(
                                   twentyPercentOfBasePrice,
-                                  DiscountDescription.of(discountTitle, discountType)))));
-              return new SelectedPrice(basePrice, null, companionDiscountAvailable);
+                                  DiscountDescription.of(discountTitle, discountType))))),
+                  null,
+                  companionDiscountAvailable);
             }
           }
         }
