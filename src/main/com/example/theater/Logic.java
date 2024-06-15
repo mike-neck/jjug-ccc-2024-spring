@@ -50,10 +50,12 @@ public class Logic {
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
       DiscountType discountTypeByVisitorProperties = visitor.discount();
-      boolean companionDiscount = companionDiscountAvailable;
       SelectedPrice selectedPrice =
           selectPriceByVisitorProperties(
-              visitorGroup, discountTypeByVisitorProperties, companionDiscount, visitorFeeDetails);
+              visitorGroup,
+              discountTypeByVisitorProperties,
+              companionDiscountAvailable,
+              visitorFeeDetails);
       if (selectedPrice.feeDetailsForShareHolder() != null) {
         return selectedPrice.feeDetailsForShareHolder();
       }
@@ -71,26 +73,27 @@ public class Logic {
   private @NotNull SelectedPrice selectPriceByVisitorProperties(
       @NotNull VisitorGroup visitorGroup,
       DiscountType discountTypeByVisitorProperties,
-      boolean companionDiscount,
+      boolean companionDiscountAvailable,
       VisitorFeeDetails visitorFeeDetails) {
     Price fullPrice = priceConfiguration.getBasePrice();
     Price eightyPercentOfBasePrice = new Price(fullPrice.value() * 4 / 5);
     Price twentyPercentOfBasePrice =
         new Price(fullPrice.value() - eightyPercentOfBasePrice.value());
     Price halfOfBasePrice = new Price(fullPrice.value() / 2);
-    @Nullable BasePrice basePrice = null;
-    @Nullable VisitorFeeDetails feeDetailsForShareHolder = null;
+    @Nullable BasePrice basePrice;
+    @Nullable VisitorFeeDetails feeDetailsForShareHolder;
     if (discountTypeByVisitorProperties == null) {
-      if (companionDiscount) {
-        basePrice =
+      if (companionDiscountAvailable) {
+        return new SelectedPrice(
             new BasePrice(
                 eightyPercentOfBasePrice,
                 new ArrayList<>(
                     List.of(
                         new Discount(
                             twentyPercentOfBasePrice,
-                            DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES)))));
-        companionDiscount = false;
+                            DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES))))),
+            null,
+            false);
       }
     } else {
       if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
@@ -107,20 +110,20 @@ public class Logic {
                             fullPrice, DiscountDescription.of("株主優待券", shareHolderTicket))));
             feeDetailsForShareHolder.setBasePrice(companionVisitor.id(), bp);
           }
-          basePrice = null;
-          companionDiscount = companionDiscount;
+          return new SelectedPrice(null, feeDetailsForShareHolder, companionDiscountAvailable);
         }
       } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
         switch (discountType) {
           case CHILD -> {
-            basePrice =
+            return new SelectedPrice(
                 new BasePrice(
                     halfOfBasePrice,
                     new ArrayList<>(
                         List.of(
                             new Discount(
-                                halfOfBasePrice, DiscountDescription.of("子供割引", discountType)))));
-            companionDiscount = companionDiscount;
+                                halfOfBasePrice, DiscountDescription.of("子供割引", discountType))))),
+                null,
+                companionDiscountAvailable);
           }
           case DISABILITIES -> {
             ArrayList<Discount> discounts =
@@ -143,11 +146,8 @@ public class Logic {
                 break;
               }
             }
-            if (!companionFound) {
-              companionDiscount = true;
-            } else {
-              companionDiscount = companionDiscount;
-            }
+            return new SelectedPrice(
+                basePrice, null, !companionFound || companionDiscountAvailable);
           }
           case FEMALES, ELDERLIES -> {
             LocalDate today = priceConfiguration.getToday();
@@ -163,15 +163,14 @@ public class Logic {
                               new Discount(
                                   twentyPercentOfBasePrice,
                                   DiscountDescription.of(discountTitle, discountType)))));
-              companionDiscount = companionDiscount;
+              return new SelectedPrice(basePrice, null, companionDiscountAvailable);
             }
           }
         }
       }
     }
-    SelectedPrice selectedPrice =
-        new SelectedPrice(basePrice, feeDetailsForShareHolder, companionDiscount);
-    return selectedPrice;
+    return new SelectedPrice(
+        defaultBasePrice(priceConfiguration.getBasePrice()), null, companionDiscountAvailable);
   }
 
   private record SelectedPrice(
