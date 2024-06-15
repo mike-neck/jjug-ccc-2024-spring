@@ -99,11 +99,9 @@ public class Logic {
           case FEMALES, ELDERLIES -> {
             LocalDate today = priceConfiguration.getToday();
             DayOfWeek todayDayOfWeek = today.getDayOfWeek();
-            String discountTitle = discountType == DiscountTypes.FEMALES ? "女性割引" : "シニア割引";
             if (todayDayOfWeek == DayOfWeek.WEDNESDAY
                 && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
-              return femalesAndElderliesPrice(
-                  companionDiscountAvailable, discountType, fullPrice, discountTitle);
+              return femalesAndElderliesPrice(companionDiscountAvailable, discountType, fullPrice);
             }
           }
         }
@@ -187,11 +185,9 @@ public class Logic {
   }
 
   private static @NotNull SelectedPrice femalesAndElderliesPrice(
-      boolean companionDiscountAvailable,
-      DiscountTypes discountType,
-      @NotNull Price fullPrice,
-      String discountTitle) {
+      boolean companionDiscountAvailable, DiscountTypes discountType, @NotNull Price fullPrice) {
     Price eightyPercentOfBasePrice = new Price(fullPrice.value() * 4 / 5);
+    String discountTitle = discountType == DiscountTypes.FEMALES ? "女性割引" : "シニア割引";
     return new SelectedPrice(
         new BasePrice(
             eightyPercentOfBasePrice,
