@@ -44,11 +44,11 @@ public class Logic {
 
   private @NotNull VisitorFeeDetails calculateBasePrices(@NotNull VisitorGroup visitorGroup) {
     VisitorFeeDetails visitorFeeDetails = createVisitorFeeDetails();
-    Price basePrice = priceConfiguration.getBasePrice();
-    Price eightyPercentOfBasePrice = new Price(basePrice.value() * 4 / 5);
+    Price fullPrice = priceConfiguration.getBasePrice();
+    Price eightyPercentOfBasePrice = new Price(fullPrice.value() * 4 / 5);
     Price twentyPercentOfBasePrice =
-        new Price(basePrice.value() - eightyPercentOfBasePrice.value());
-    Price halfOfBasePrice = new Price(basePrice.value() / 2);
+        new Price(fullPrice.value() - eightyPercentOfBasePrice.value());
+    Price halfOfBasePrice = new Price(fullPrice.value() / 2);
 
     boolean companionDiscountAvailable = false;
     for (Visitor visitor : visitorGroup) {
@@ -67,7 +67,7 @@ public class Logic {
           visitorFeeDetails.setBasePrice(visitorId, bp);
           companionDiscountAvailable = false;
         } else {
-          BasePrice bp = defaultBasePrice(basePrice);
+          BasePrice bp = defaultBasePrice(fullPrice);
           visitorFeeDetails.setBasePrice(visitorId, bp);
         }
       } else {
@@ -77,12 +77,12 @@ public class Logic {
               Price price = new Price(0);
               BasePrice bp =
                   new BasePrice(
-                      price, List.of(new Discount(basePrice, DiscountDescription.of("株主優待券", s))));
+                      price, List.of(new Discount(fullPrice, DiscountDescription.of("株主優待券", s))));
               visitorFeeDetails.setBasePrice(companionVisitor.id(), bp);
             }
             break;
           } else {
-            BasePrice bp = defaultBasePrice(basePrice);
+            BasePrice bp = defaultBasePrice(fullPrice);
             visitorFeeDetails.setBasePrice(visitorId, bp);
           }
         } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
@@ -110,7 +110,7 @@ public class Logic {
               boolean companionFound = false;
               for (UUID companionVisitorId :
                   Set.copyOf(visitorFeeDetails.visitorToPrice().keySet())) {
-                if (basePrice.equals(visitorFeeDetails.visitorToPrice().get(companionVisitorId))) {
+                if (fullPrice.equals(visitorFeeDetails.visitorToPrice().get(companionVisitorId))) {
                   companionFound = true;
                   visitorFeeDetails
                       .visitorToPrice()
@@ -139,7 +139,7 @@ public class Logic {
                                     DiscountDescription.of(discountTitle, discountType)))));
                 visitorFeeDetails.setBasePrice(visitorId, bp);
               } else {
-                BasePrice bp = defaultBasePrice(basePrice);
+                BasePrice bp = defaultBasePrice(fullPrice);
                 visitorFeeDetails.setBasePrice(visitorId, bp);
               }
             }
