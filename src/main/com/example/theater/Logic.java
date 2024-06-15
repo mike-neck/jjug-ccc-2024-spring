@@ -37,9 +37,7 @@ public class Logic {
 
     calculateBasePrices(
         visitorGroup, companionDiscountAvailable, visitorToPrice, visitorToDiscount);
-    Price basePrice1 = priceConfiguration.getBasePrice();
-    Price halfOfBasePrice1 = new Price(basePrice1.value() / 2);
-    applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount, halfOfBasePrice1);
+    applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount);
     return compileAudienceList(
         visitorGroup, new VisitorFeeDetails(visitorToPrice, visitorToDiscount));
   }
@@ -148,6 +146,15 @@ public class Logic {
         }
       }
     }
+  }
+
+  private void applyOptionalDiscounts(
+          @NotNull VisitorGroup visitorGroup,
+          Map<UUID, Price> visitorToPrice,
+          Map<UUID, List<Discount>> visitorToDiscount) {
+    Price basePrice1 = priceConfiguration.getBasePrice();
+    Price halfOfBasePrice1 = new Price(basePrice1.value() / 2);
+    applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount, halfOfBasePrice1);
   }
 
   private void applyOptionalDiscounts(
