@@ -163,8 +163,6 @@ public class Logic {
     visitorFeeDetails.visitorToDiscount().put(visitorId, bp.discounts());
   }
 
-  private record BasePrice(Price price, ArrayList<Discount> discounts) {}
-
   private void applyOptionalDiscounts(
       @NotNull VisitorGroup visitorGroup, @NotNull VisitorFeeDetails visitorFeeDetails) {
     Map<UUID, Price> visitorToPrice = visitorFeeDetails.visitorToPrice();
