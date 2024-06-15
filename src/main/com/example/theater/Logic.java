@@ -83,47 +83,39 @@ public class Logic {
           visitorFeeDetails,
           discountTypeByVisitorProperties,
           fullPrice);
-    } else {
-      if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
-        if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(
-            shareHolderTicket.id())) {
-          return shareHolderPrice(
-              visitorGroup,
-              companionDiscountAvailable,
-              visitorFeeDetails,
-              shareHolderTicket,
-              fullPrice);
+    }
+
+    if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
+      if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(
+          shareHolderTicket.id())) {
+        return shareHolderPrice(
+            visitorGroup,
+            companionDiscountAvailable,
+            visitorFeeDetails,
+            shareHolderTicket,
+            fullPrice);
+      }
+    } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
+      switch (discountType) {
+        case CHILD -> {
+          return childrenPrice(
+              visitorGroup, companionDiscountAvailable, visitorFeeDetails, discountType, fullPrice);
         }
-      } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
-        switch (discountType) {
-          case CHILD -> {
-            return childrenPrice(
+        case DISABILITIES -> {
+          return disabilitiesPrice(
+              visitorGroup, companionDiscountAvailable, visitorFeeDetails, discountType, fullPrice);
+        }
+        case FEMALES, ELDERLIES -> {
+          LocalDate today = priceConfiguration.getToday();
+          DayOfWeek todayDayOfWeek = today.getDayOfWeek();
+          if (todayDayOfWeek == DayOfWeek.WEDNESDAY
+              && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
+            return femalesAndElderliesPrice(
                 visitorGroup,
                 companionDiscountAvailable,
                 visitorFeeDetails,
                 discountType,
                 fullPrice);
-          }
-          case DISABILITIES -> {
-            return disabilitiesPrice(
-                visitorGroup,
-                companionDiscountAvailable,
-                visitorFeeDetails,
-                discountType,
-                fullPrice);
-          }
-          case FEMALES, ELDERLIES -> {
-            LocalDate today = priceConfiguration.getToday();
-            DayOfWeek todayDayOfWeek = today.getDayOfWeek();
-            if (todayDayOfWeek == DayOfWeek.WEDNESDAY
-                && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
-              return femalesAndElderliesPrice(
-                  visitorGroup,
-                  companionDiscountAvailable,
-                  visitorFeeDetails,
-                  discountType,
-                  fullPrice);
-            }
           }
         }
       }
