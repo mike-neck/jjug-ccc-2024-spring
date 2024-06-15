@@ -58,7 +58,7 @@ public class Logic {
       @Nullable BasePrice basePrice = null;
       if (discountTypeByVisitorProperties == null) {
         if (companionDiscountAvailable) {
-          BasePrice bp =
+          basePrice =
               new BasePrice(
                   eightyPercentOfBasePrice,
                   new ArrayList<>(
@@ -66,11 +66,9 @@ public class Logic {
                           new Discount(
                               twentyPercentOfBasePrice,
                               DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES)))));
-          visitorFeeDetails.setBasePrice(visitorId, bp);
           companionDiscountAvailable = false;
         } else {
-          BasePrice bp = defaultBasePrice(fullPrice);
-          visitorFeeDetails.setBasePrice(visitorId, bp);
+          basePrice = defaultBasePrice(fullPrice);
         }
       } else {
         if (discountTypeByVisitorProperties instanceof ShareHolderTicket s) {
@@ -84,20 +82,18 @@ public class Logic {
             }
             break;
           } else {
-            BasePrice bp = defaultBasePrice(fullPrice);
-            visitorFeeDetails.setBasePrice(visitorId, bp);
+            basePrice = defaultBasePrice(fullPrice);
           }
         } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
           switch (discountType) {
             case CHILD -> {
-              BasePrice bp =
+              basePrice =
                   new BasePrice(
                       halfOfBasePrice,
                       new ArrayList<>(
                           List.of(
                               new Discount(
                                   halfOfBasePrice, DiscountDescription.of("子供割引", discountType)))));
-              visitorFeeDetails.setBasePrice(visitorId, bp);
             }
             case DISABILITIES -> {
               ArrayList<Discount> discounts =
@@ -106,8 +102,7 @@ public class Logic {
                           new Discount(
                               twentyPercentOfBasePrice,
                               DiscountDescription.of("障がい者割引", discountType))));
-              BasePrice bp = new BasePrice(eightyPercentOfBasePrice, discounts);
-              visitorFeeDetails.setBasePrice(visitorId, bp);
+              basePrice = new BasePrice(eightyPercentOfBasePrice, discounts);
 
               boolean companionFound = false;
               for (UUID companionVisitorId :
@@ -131,7 +126,7 @@ public class Logic {
               String discountTitle = discountType == DiscountTypes.FEMALES ? "女性割引" : "シニア割引";
               if (todayDayOfWeek == DayOfWeek.WEDNESDAY
                   && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
-                BasePrice bp =
+                basePrice =
                     new BasePrice(
                         eightyPercentOfBasePrice,
                         new ArrayList<>(
@@ -139,10 +134,8 @@ public class Logic {
                                 new Discount(
                                     twentyPercentOfBasePrice,
                                     DiscountDescription.of(discountTitle, discountType)))));
-                visitorFeeDetails.setBasePrice(visitorId, bp);
               } else {
-                BasePrice bp = defaultBasePrice(fullPrice);
-                visitorFeeDetails.setBasePrice(visitorId, bp);
+                basePrice = defaultBasePrice(fullPrice);
               }
             }
           }
