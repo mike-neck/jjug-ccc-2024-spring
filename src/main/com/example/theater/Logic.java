@@ -33,8 +33,8 @@ public class Logic {
   public @NotNull List<Audience> calculateAdmissionFee(@NotNull VisitorGroup visitorGroup) {
     Map<UUID, Price> visitorToPrice = new HashMap<>();
     Map<UUID, List<Discount>> visitorToDiscount = new HashMap<>();
-    boolean companionDiscountAvailable = false;
 
+    boolean companionDiscountAvailable = false;
     calculateBasePrices(
         visitorGroup, companionDiscountAvailable, visitorToPrice, visitorToDiscount);
     applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount);
@@ -192,8 +192,7 @@ public class Logic {
                 && halfOfBasePrice.value() < currentPrice.value()
                 && 5000 <= receipt.totalPayment()) {
               Price discountedPrice = new Price(currentPrice.value() - 100);
-              boolean higherThanHalfOfBasePrice =
-                  halfOfBasePrice.value() < discountedPrice.value();
+              boolean higherThanHalfOfBasePrice = halfOfBasePrice.value() < discountedPrice.value();
               visitorToPrice.put(
                   visitor.id(), higherThanHalfOfBasePrice ? discountedPrice : halfOfBasePrice);
               discountList.add(
@@ -210,8 +209,7 @@ public class Logic {
                 && halfOfBasePrice.value() < currentPrice.value()
                 && internetPremiumMembersDatabase.isValidMemberId(internetPremiumMember.userId())) {
               Price discountedPrice = new Price(currentPrice.value() - 200);
-              boolean higherThanHalfOfBasePrice =
-                  halfOfBasePrice.value() < discountedPrice.value();
+              boolean higherThanHalfOfBasePrice = halfOfBasePrice.value() < discountedPrice.value();
               visitorToPrice.put(
                   visitor.id(), higherThanHalfOfBasePrice ? discountedPrice : halfOfBasePrice);
               discountList.add(
@@ -230,8 +228,7 @@ public class Logic {
                 && discountTicket.price().value() < currentPrice.value()) {
               Price discountedPrice =
                   new Price(currentPrice.value() - discountTicket.price().value());
-              boolean higherThanHalfOfBasePrice =
-                  halfOfBasePrice.value() < discountedPrice.value();
+              boolean higherThanHalfOfBasePrice = halfOfBasePrice.value() < discountedPrice.value();
               visitorToPrice.put(
                   visitor.id(), higherThanHalfOfBasePrice ? discountedPrice : halfOfBasePrice);
               discountList.add(
