@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 public class Logic {
@@ -54,6 +55,7 @@ public class Logic {
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
       DiscountType discountTypeByVisitorProperties = visitor.discount();
+      @Nullable BasePrice basePrice = null;
       if (discountTypeByVisitorProperties == null) {
         if (companionDiscountAvailable) {
           BasePrice bp =
@@ -145,6 +147,9 @@ public class Logic {
             }
           }
         }
+      }
+      if (basePrice != null) {
+        visitorFeeDetails.setBasePrice(visitorId, basePrice);
       }
     }
     return visitorFeeDetails;
