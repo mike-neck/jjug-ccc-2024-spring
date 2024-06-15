@@ -49,9 +49,9 @@ public class Logic {
         twentyPercentOfBasePrice,
         basePrice,
         halfOfBasePrice);
-    Price basePrice = priceConfiguration.getBasePrice();
-    Price halfOfBasePrice = new Price(basePrice.value() / 2);
-    applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount, halfOfBasePrice);
+    Price basePrice1 = priceConfiguration.getBasePrice();
+    Price halfOfBasePrice1 = new Price(basePrice1.value() / 2);
+    applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount, halfOfBasePrice1);
     return compileAudienceList(
         visitorGroup, new VisitorFeeDetails(visitorToPrice, visitorToDiscount));
   }
