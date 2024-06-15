@@ -58,65 +58,67 @@ public class Logic {
       DiscountType discountTypeByVisitorProperties = visitor.discount();
       if (discountTypeByVisitorProperties == null) {
         if (companionDiscountAvailable) {
-          visitorToPrice.put(visitorId, eightyPercentOfBasePrice);
-          visitorToDiscount.put(
-              visitorId,
+          Price price = eightyPercentOfBasePrice;
+          ArrayList<Discount> discounts =
               new ArrayList<>(
                   List.of(
                       new Discount(
                           twentyPercentOfBasePrice,
-                          DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES)))));
+                          DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES))));
+          visitorToPrice.put(visitorId, price);
+          visitorToDiscount.put(visitorId, discounts);
           companionDiscountAvailable = false;
         } else {
-          visitorToPrice.put(visitorId, basePrice);
-          visitorToDiscount.put(visitorId, new ArrayList<>());
+          Price price = basePrice;
+          ArrayList<Discount> discounts = new ArrayList<>();
+          visitorToPrice.put(visitorId, price);
+          visitorToDiscount.put(visitorId, discounts);
         }
       } else {
         if (discountTypeByVisitorProperties instanceof ShareHolderTicket s) {
           if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(s.id())) {
             for (Visitor companionVisitor : visitorGroup) {
-              visitorToPrice.put(companionVisitor.id(), new Price(0));
-              visitorToDiscount.put(
-                  companionVisitor.id(),
-                  List.of(new Discount(basePrice, DiscountDescription.of("株主優待券", s))));
+              Price price = new Price(0);
+              List<Discount> discounts =
+                  List.of(new Discount(basePrice, DiscountDescription.of("株主優待券", s)));
+              visitorToPrice.put(companionVisitor.id(), price);
+              visitorToDiscount.put(companionVisitor.id(), discounts);
             }
             break;
           } else {
-            visitorToPrice.put(visitorId, basePrice);
-            visitorToDiscount.put(visitorId, new ArrayList<>());
+            Price price = basePrice;
+            ArrayList<Discount> discounts = new ArrayList<>();
+            visitorToPrice.put(visitorId, price);
+            visitorToDiscount.put(visitorId, discounts);
           }
         } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
           switch (discountType) {
             case CHILD -> {
-              visitorToPrice.put(visitorId, halfOfBasePrice);
-              visitorToDiscount.put(
-                  visitorId,
+              Price price = halfOfBasePrice;
+              visitorToPrice.put(visitorId, price);
+              ArrayList<Discount> discounts =
                   new ArrayList<>(
                       List.of(
                           new Discount(
-                              halfOfBasePrice, DiscountDescription.of("子供割引", discountType)))));
+                              halfOfBasePrice, DiscountDescription.of("子供割引", discountType))));
+              visitorToDiscount.put(visitorId, discounts);
             }
             case DISABILITIES -> {
-              visitorToPrice.put(visitorId, eightyPercentOfBasePrice);
-              visitorToDiscount.put(
-                  visitorId,
+              Price price = eightyPercentOfBasePrice;
+              visitorToPrice.put(visitorId, price);
+              ArrayList<Discount> discounts =
                   new ArrayList<>(
                       List.of(
                           new Discount(
                               twentyPercentOfBasePrice,
-                              DiscountDescription.of("障がい者割引", discountType)))));
+                              DiscountDescription.of("障がい者割引", discountType))));
+              visitorToDiscount.put(visitorId, discounts);
               boolean companionFound = false;
               for (UUID companionVisitorId : Set.copyOf(visitorToPrice.keySet())) {
                 if (basePrice.equals(visitorToPrice.get(companionVisitorId))) {
                   companionFound = true;
-                  visitorToPrice.put(companionVisitorId, eightyPercentOfBasePrice);
-                  visitorToDiscount.put(
-                      companionVisitorId,
-                      new ArrayList<>(
-                          List.of(
-                              new Discount(
-                                  twentyPercentOfBasePrice,
-                                  DiscountDescription.of("障がい者割引", discountType)))));
+                  visitorToPrice.put(companionVisitorId, price);
+                  visitorToDiscount.put(companionVisitorId, discounts);
                   break;
                 }
               }
@@ -130,17 +132,20 @@ public class Logic {
               String discountTitle = discountType == DiscountTypes.FEMALES ? "女性割引" : "シニア割引";
               if (todayDayOfWeek == DayOfWeek.WEDNESDAY
                   && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
-                visitorToPrice.put(visitorId, eightyPercentOfBasePrice);
-                visitorToDiscount.put(
-                    visitorId,
+                Price price = eightyPercentOfBasePrice;
+                ArrayList<Discount> discounts =
                     new ArrayList<>(
                         List.of(
                             new Discount(
                                 twentyPercentOfBasePrice,
-                                DiscountDescription.of(discountTitle, discountType)))));
+                                DiscountDescription.of(discountTitle, discountType))));
+                visitorToPrice.put(visitorId, price);
+                visitorToDiscount.put(visitorId, discounts);
               } else {
-                visitorToPrice.put(visitorId, basePrice);
-                visitorToDiscount.put(visitorId, new ArrayList<>());
+                Price price = basePrice;
+                ArrayList<Discount> discounts = new ArrayList<>();
+                visitorToPrice.put(visitorId, price);
+                visitorToDiscount.put(visitorId, discounts);
               }
             }
           }
