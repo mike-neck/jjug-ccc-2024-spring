@@ -31,15 +31,15 @@ public class Logic {
   }
 
   public @NotNull List<Audience> calculateAdmissionFee(@NotNull VisitorGroup visitorGroup) {
-    Price basePrice = priceConfiguration.getBasePrice();
     Map<UUID, Price> visitorToPrice = new HashMap<>();
     Map<UUID, List<Discount>> visitorToDiscount = new HashMap<>();
     boolean companionDiscountAvailable = false;
+
+    Price basePrice = priceConfiguration.getBasePrice();
     Price eightyPercentOfBasePrice = new Price(basePrice.value() * 4 / 5);
     Price twentyPercentOfBasePrice =
         new Price(basePrice.value() - eightyPercentOfBasePrice.value());
     Price halfOfBasePrice = new Price(basePrice.value() / 2);
-
     calculateBasePrices(
         visitorGroup,
         companionDiscountAvailable,
