@@ -58,107 +58,138 @@ public class Logic {
       @Nullable BasePrice basePrice = null;
       @Nullable VisitorFeeDetails feeDetailsForShareHolder = null;
       boolean companionDiscount = companionDiscountAvailable;
-      if (discountTypeByVisitorProperties == null) {
-        if (companionDiscount) {
-          basePrice =
-              new BasePrice(
-                  eightyPercentOfBasePrice,
-                  new ArrayList<>(
-                      List.of(
-                          new Discount(
-                              twentyPercentOfBasePrice,
-                              DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES)))));
-          companionDiscount = false;
-        }
-      } else {
-        if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
-          if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(
-              shareHolderTicket.id())) {
-            feeDetailsForShareHolder = new VisitorFeeDetails();
-            for (Visitor companionVisitor : visitorGroup) {
-              Price price = new Price(0);
-              BasePrice bp =
-                  new BasePrice(
-                      price,
-                      List.of(
-                          new Discount(
-                              fullPrice, DiscountDescription.of("株主優待券", shareHolderTicket))));
-              feeDetailsForShareHolder.setBasePrice(companionVisitor.id(), bp);
-            }
-            basePrice = null;
-            companionDiscount = companionDiscount;
-          }
-        } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
-          switch (discountType) {
-            case CHILD -> {
-              basePrice =
-                  new BasePrice(
-                      halfOfBasePrice,
-                      new ArrayList<>(
-                          List.of(
-                              new Discount(
-                                  halfOfBasePrice, DiscountDescription.of("子供割引", discountType)))));
-              companionDiscount = companionDiscount;
-            }
-            case DISABILITIES -> {
-              ArrayList<Discount> discounts =
-                  new ArrayList<>(
-                      List.of(
-                          new Discount(
-                              twentyPercentOfBasePrice,
-                              DiscountDescription.of("障がい者割引", discountType))));
-              basePrice = new BasePrice(eightyPercentOfBasePrice, discounts);
-
-              boolean companionFound = false;
-              for (UUID companionVisitorId :
-                  Set.copyOf(visitorFeeDetails.visitorToPrice().keySet())) {
-                if (fullPrice.equals(visitorFeeDetails.visitorToPrice().get(companionVisitorId))) {
-                  companionFound = true;
-                  visitorFeeDetails
-                      .visitorToPrice()
-                      .put(companionVisitorId, eightyPercentOfBasePrice);
-                  visitorFeeDetails.visitorToDiscount().put(companionVisitorId, discounts);
-                  break;
-                }
-              }
-              if (!companionFound) {
-                companionDiscount = true;
-              } else {
-                companionDiscount = companionDiscount;
-              }
-            }
-            case FEMALES, ELDERLIES -> {
-              LocalDate today = priceConfiguration.getToday();
-              DayOfWeek todayDayOfWeek = today.getDayOfWeek();
-              String discountTitle = discountType == DiscountTypes.FEMALES ? "女性割引" : "シニア割引";
-              if (todayDayOfWeek == DayOfWeek.WEDNESDAY
-                  && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
-                basePrice =
-                    new BasePrice(
-                        eightyPercentOfBasePrice,
-                        new ArrayList<>(
-                            List.of(
-                                new Discount(
-                                    twentyPercentOfBasePrice,
-                                    DiscountDescription.of(discountTitle, discountType)))));
-                companionDiscount = companionDiscount;
-              }
-            }
-          }
-        }
+      SelectedPrice selectedPrice =
+          selectPriceByVisitorProperties(
+              visitorGroup,
+              discountTypeByVisitorProperties,
+              companionDiscount,
+              basePrice,
+              eightyPercentOfBasePrice,
+              twentyPercentOfBasePrice,
+              feeDetailsForShareHolder,
+              fullPrice,
+              halfOfBasePrice,
+              visitorFeeDetails);
+      if (selectedPrice.feeDetailsForShareHolder() != null) {
+        return selectedPrice.feeDetailsForShareHolder();
       }
-      if (feeDetailsForShareHolder != null) {
-        return feeDetailsForShareHolder;
-      }
-      if (basePrice != null) {
-        visitorFeeDetails.setBasePrice(visitorId, basePrice);
+      if (selectedPrice.basePrice() != null) {
+        visitorFeeDetails.setBasePrice(visitorId, selectedPrice.basePrice());
       } else {
         visitorFeeDetails.setBasePrice(visitorId, defaultBasePrice(fullPrice));
       }
-      companionDiscountAvailable = companionDiscount;
+      companionDiscountAvailable = selectedPrice.companionDiscount();
     }
     return visitorFeeDetails;
   }
+
+  private @NotNull SelectedPrice selectPriceByVisitorProperties(
+      @NotNull VisitorGroup visitorGroup,
+      DiscountType discountTypeByVisitorProperties,
+      boolean companionDiscount,
+      @Nullable BasePrice basePrice,
+      Price eightyPercentOfBasePrice,
+      Price twentyPercentOfBasePrice,
+      @Nullable VisitorFeeDetails feeDetailsForShareHolder,
+      Price fullPrice,
+      Price halfOfBasePrice,
+      VisitorFeeDetails visitorFeeDetails) {
+    if (discountTypeByVisitorProperties == null) {
+      if (companionDiscount) {
+        basePrice =
+            new BasePrice(
+                eightyPercentOfBasePrice,
+                new ArrayList<>(
+                    List.of(
+                        new Discount(
+                            twentyPercentOfBasePrice,
+                            DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES)))));
+        companionDiscount = false;
+      }
+    } else {
+      if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
+        if (publishedShareHolderTicketsDatabase.isPublishedShareHolderTicket(
+            shareHolderTicket.id())) {
+          feeDetailsForShareHolder = new VisitorFeeDetails();
+          for (Visitor companionVisitor : visitorGroup) {
+            Price price = new Price(0);
+            BasePrice bp =
+                new BasePrice(
+                    price,
+                    List.of(
+                        new Discount(
+                            fullPrice, DiscountDescription.of("株主優待券", shareHolderTicket))));
+            feeDetailsForShareHolder.setBasePrice(companionVisitor.id(), bp);
+          }
+          basePrice = null;
+          companionDiscount = companionDiscount;
+        }
+      } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
+        switch (discountType) {
+          case CHILD -> {
+            basePrice =
+                new BasePrice(
+                    halfOfBasePrice,
+                    new ArrayList<>(
+                        List.of(
+                            new Discount(
+                                halfOfBasePrice, DiscountDescription.of("子供割引", discountType)))));
+            companionDiscount = companionDiscount;
+          }
+          case DISABILITIES -> {
+            ArrayList<Discount> discounts =
+                new ArrayList<>(
+                    List.of(
+                        new Discount(
+                            twentyPercentOfBasePrice,
+                            DiscountDescription.of("障がい者割引", discountType))));
+            basePrice = new BasePrice(eightyPercentOfBasePrice, discounts);
+
+            boolean companionFound = false;
+            for (UUID companionVisitorId :
+                Set.copyOf(visitorFeeDetails.visitorToPrice().keySet())) {
+              if (fullPrice.equals(visitorFeeDetails.visitorToPrice().get(companionVisitorId))) {
+                companionFound = true;
+                visitorFeeDetails
+                    .visitorToPrice()
+                    .put(companionVisitorId, eightyPercentOfBasePrice);
+                visitorFeeDetails.visitorToDiscount().put(companionVisitorId, discounts);
+                break;
+              }
+            }
+            if (!companionFound) {
+              companionDiscount = true;
+            } else {
+              companionDiscount = companionDiscount;
+            }
+          }
+          case FEMALES, ELDERLIES -> {
+            LocalDate today = priceConfiguration.getToday();
+            DayOfWeek todayDayOfWeek = today.getDayOfWeek();
+            String discountTitle = discountType == DiscountTypes.FEMALES ? "女性割引" : "シニア割引";
+            if (todayDayOfWeek == DayOfWeek.WEDNESDAY
+                && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
+              basePrice =
+                  new BasePrice(
+                      eightyPercentOfBasePrice,
+                      new ArrayList<>(
+                          List.of(
+                              new Discount(
+                                  twentyPercentOfBasePrice,
+                                  DiscountDescription.of(discountTitle, discountType)))));
+              companionDiscount = companionDiscount;
+            }
+          }
+        }
+      }
+    }
+    SelectedPrice selectedPrice =
+        new SelectedPrice(basePrice, feeDetailsForShareHolder, companionDiscount);
+    return selectedPrice;
+  }
+
+  private record SelectedPrice(
+      BasePrice basePrice, VisitorFeeDetails feeDetailsForShareHolder, boolean companionDiscount) {}
 
   private static @NotNull BasePrice defaultBasePrice(Price basePrice) {
     return new BasePrice(basePrice, new ArrayList<>());
