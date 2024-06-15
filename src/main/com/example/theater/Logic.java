@@ -96,31 +96,38 @@ public class Logic {
           fullPrice);
     }
 
-    if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
-      switch (discountType) {
-        case CHILD -> {
-          return childrenPrice(
-              visitorGroup, companionDiscountAvailable, visitorFeeDetails, discountType, fullPrice);
-        }
-        case DISABILITIES -> {
-          return disabilitiesPrice(
-              visitorGroup, companionDiscountAvailable, visitorFeeDetails, discountType, fullPrice);
-        }
-        case FEMALES, ELDERLIES -> {
-          LocalDate today = priceConfiguration.getToday();
-          DayOfWeek todayDayOfWeek = today.getDayOfWeek();
-          if (todayDayOfWeek == DayOfWeek.WEDNESDAY
-              && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
-            return femalesAndElderliesPrice(
-                visitorGroup,
-                companionDiscountAvailable,
-                visitorFeeDetails,
-                discountType,
-                fullPrice);
-          }
-        }
-      }
+    if (discountTypeByVisitorProperties == DiscountType.CHILD) {
+      return childrenPrice(
+          visitorGroup,
+          companionDiscountAvailable,
+          visitorFeeDetails,
+          DiscountType.CHILD,
+          fullPrice);
     }
+
+    if (discountTypeByVisitorProperties == DiscountType.DISABILITIES) {
+      return disabilitiesPrice(
+          visitorGroup,
+          companionDiscountAvailable,
+          visitorFeeDetails,
+          DiscountType.DISABILITIES,
+          fullPrice);
+    }
+
+    LocalDate today = priceConfiguration.getToday();
+    DayOfWeek todayDayOfWeek = today.getDayOfWeek();
+    if ((discountTypeByVisitorProperties == DiscountType.FEMALES
+            || discountTypeByVisitorProperties == DiscountType.SENIOR_CITIZENS)
+        && todayDayOfWeek == DayOfWeek.WEDNESDAY
+        && (today.getMonth() != Month.JANUARY || 3 < today.getDayOfMonth())) {
+      return femalesAndElderliesPrice(
+          visitorGroup,
+          companionDiscountAvailable,
+          visitorFeeDetails,
+          discountTypeByVisitorProperties,
+          fullPrice);
+    }
+
     return new SelectedPrice(
         defaultBasePrice(priceConfiguration.getBasePrice()), null, companionDiscountAvailable);
   }
@@ -166,7 +173,7 @@ public class Logic {
       @NotNull VisitorGroup visitorGroup,
       boolean companionDiscountAvailable,
       VisitorFeeDetails visitorFeeDetails,
-      DiscountTypes discountType,
+      DiscountType discountType,
       @NotNull Price fullPrice) {
     Price halfOfBasePrice = new Price(fullPrice.value() / 2);
     return new SelectedPrice(
@@ -184,7 +191,7 @@ public class Logic {
       @NotNull VisitorGroup visitorGroup,
       boolean companionDiscountAvailable,
       @NotNull VisitorFeeDetails visitorFeeDetails,
-      DiscountTypes discountType,
+      DiscountType discountType,
       @NotNull Price fullPrice) {
     Price eightyPercentOfBasePrice = new Price(fullPrice.value() * 4 / 5);
     ArrayList<Discount> discounts =
@@ -213,7 +220,7 @@ public class Logic {
       @NotNull VisitorGroup visitorGroup,
       boolean companionDiscountAvailable,
       VisitorFeeDetails visitorFeeDetails,
-      DiscountTypes discountType,
+      DiscountType discountType,
       @NotNull Price fullPrice) {
     Price eightyPercentOfBasePrice = new Price(fullPrice.value() * 4 / 5);
     String discountTitle = discountType == DiscountTypes.FEMALES ? "女性割引" : "シニア割引";
