@@ -34,12 +34,19 @@ public class Logic {
     Map<UUID, Price> visitorToPrice = new HashMap<>();
     Map<UUID, List<Discount>> visitorToDiscount = new HashMap<>();
 
-    boolean companionDiscountAvailable = false;
-    calculateBasePrices(
-        visitorGroup, companionDiscountAvailable, visitorToPrice, visitorToDiscount);
+    calculateBasePrices(visitorGroup, visitorToPrice, visitorToDiscount);
     applyOptionalDiscounts(visitorGroup, visitorToPrice, visitorToDiscount);
     return compileAudienceList(
         visitorGroup, new VisitorFeeDetails(visitorToPrice, visitorToDiscount));
+  }
+
+  private void calculateBasePrices(
+      @NotNull VisitorGroup visitorGroup,
+      Map<UUID, Price> visitorToPrice,
+      Map<UUID, List<Discount>> visitorToDiscount) {
+    boolean companionDiscountAvailable = false;
+    calculateBasePrices(
+        visitorGroup, companionDiscountAvailable, visitorToPrice, visitorToDiscount);
   }
 
   private void calculateBasePrices(
