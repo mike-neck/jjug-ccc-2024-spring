@@ -57,8 +57,9 @@ public class Logic {
       DiscountType discountTypeByVisitorProperties = visitor.discount();
       @Nullable BasePrice basePrice = null;
       @Nullable VisitorFeeDetails feeDetailsForShareHolder = null;
+      boolean companionDiscount = companionDiscountAvailable;
       if (discountTypeByVisitorProperties == null) {
-        if (companionDiscountAvailable) {
+        if (companionDiscount) {
           basePrice =
               new BasePrice(
                   eightyPercentOfBasePrice,
@@ -67,7 +68,7 @@ public class Logic {
                           new Discount(
                               twentyPercentOfBasePrice,
                               DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES)))));
-          companionDiscountAvailable = false;
+          companionDiscount = false;
         }
       } else {
         if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
@@ -85,7 +86,7 @@ public class Logic {
               feeDetailsForShareHolder.setBasePrice(companionVisitor.id(), bp);
             }
             basePrice = null;
-            companionDiscountAvailable = companionDiscountAvailable;
+            companionDiscount = companionDiscount;
           }
         } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
           switch (discountType) {
@@ -97,7 +98,7 @@ public class Logic {
                           List.of(
                               new Discount(
                                   halfOfBasePrice, DiscountDescription.of("子供割引", discountType)))));
-              companionDiscountAvailable = companionDiscountAvailable;
+              companionDiscount = companionDiscount;
             }
             case DISABILITIES -> {
               ArrayList<Discount> discounts =
@@ -121,9 +122,9 @@ public class Logic {
                 }
               }
               if (!companionFound) {
-                companionDiscountAvailable = true;
+                companionDiscount = true;
               } else {
-                companionDiscountAvailable = companionDiscountAvailable;
+                companionDiscount = companionDiscount;
               }
             }
             case FEMALES, ELDERLIES -> {
@@ -140,7 +141,7 @@ public class Logic {
                                 new Discount(
                                     twentyPercentOfBasePrice,
                                     DiscountDescription.of(discountTitle, discountType)))));
-                companionDiscountAvailable = companionDiscountAvailable;
+                companionDiscount = companionDiscount;
               }
             }
           }
@@ -154,6 +155,7 @@ public class Logic {
       } else {
         visitorFeeDetails.setBasePrice(visitorId, defaultBasePrice(fullPrice));
       }
+      companionDiscountAvailable = companionDiscount;
     }
     return visitorFeeDetails;
   }
