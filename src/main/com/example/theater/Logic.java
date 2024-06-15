@@ -45,15 +45,8 @@ public class Logic {
 
   private @NotNull VisitorFeeDetails calculateBasePrices(@NotNull VisitorGroup visitorGroup) {
     VisitorFeeDetails visitorFeeDetails = createVisitorFeeDetails();
-    calculateBasePrices(
-        visitorGroup, visitorFeeDetails.visitorToPrice(), visitorFeeDetails.visitorToDiscount());
-    return visitorFeeDetails;
-  }
-
-  private void calculateBasePrices(
-      @NotNull VisitorGroup visitorGroup,
-      Map<UUID, Price> visitorToPrice,
-      Map<UUID, List<Discount>> visitorToDiscount) {
+    Map<UUID, Price> visitorToPrice = visitorFeeDetails.visitorToPrice();
+    Map<UUID, List<Discount>> visitorToDiscount = visitorFeeDetails.visitorToDiscount();
     Price basePrice = priceConfiguration.getBasePrice();
     Price eightyPercentOfBasePrice = new Price(basePrice.value() * 4 / 5);
     Price twentyPercentOfBasePrice =
@@ -155,6 +148,7 @@ public class Logic {
         }
       }
     }
+    return visitorFeeDetails;
   }
 
   private void applyOptionalDiscounts(
