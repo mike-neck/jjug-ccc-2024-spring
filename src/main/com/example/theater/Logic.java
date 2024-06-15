@@ -67,7 +67,7 @@ public class Logic {
           visitorFeeDetails.setBasePrice(visitorId, bp);
           companionDiscountAvailable = false;
         } else {
-          BasePrice bp = new BasePrice(basePrice, new ArrayList<>());
+          BasePrice bp = defaultBasePrice(basePrice);
           visitorFeeDetails.setBasePrice(visitorId, bp);
         }
       } else {
@@ -82,7 +82,7 @@ public class Logic {
             }
             break;
           } else {
-            BasePrice bp = new BasePrice(basePrice, new ArrayList<>());
+            BasePrice bp = defaultBasePrice(basePrice);
             visitorFeeDetails.setBasePrice(visitorId, bp);
           }
         } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
@@ -139,7 +139,7 @@ public class Logic {
                                     DiscountDescription.of(discountTitle, discountType)))));
                 visitorFeeDetails.setBasePrice(visitorId, bp);
               } else {
-                BasePrice bp = new BasePrice(basePrice, new ArrayList<>());
+                BasePrice bp = defaultBasePrice(basePrice);
                 visitorFeeDetails.setBasePrice(visitorId, bp);
               }
             }
@@ -148,6 +148,10 @@ public class Logic {
       }
     }
     return visitorFeeDetails;
+  }
+
+  private static @NotNull BasePrice defaultBasePrice(Price basePrice) {
+    return new BasePrice(basePrice, new ArrayList<>());
   }
 
   private void applyOptionalDiscounts(
