@@ -68,9 +68,6 @@ public class Logic {
                               twentyPercentOfBasePrice,
                               DiscountDescription.of("障がい者割引", DiscountTypes.DISABILITIES)))));
           companionDiscountAvailable = false;
-        } else {
-          basePrice = defaultBasePrice(fullPrice);
-          companionDiscountAvailable = companionDiscountAvailable;
         }
       } else {
         if (discountTypeByVisitorProperties instanceof ShareHolderTicket shareHolderTicket) {
@@ -88,9 +85,6 @@ public class Logic {
               feeDetailsForShareHolder.setBasePrice(companionVisitor.id(), bp);
             }
             basePrice = null;
-            companionDiscountAvailable = companionDiscountAvailable;
-          } else {
-            basePrice = defaultBasePrice(fullPrice);
             companionDiscountAvailable = companionDiscountAvailable;
           }
         } else if (discountTypeByVisitorProperties instanceof DiscountTypes discountType) {
@@ -147,9 +141,6 @@ public class Logic {
                                     twentyPercentOfBasePrice,
                                     DiscountDescription.of(discountTitle, discountType)))));
                 companionDiscountAvailable = companionDiscountAvailable;
-              } else {
-                basePrice = defaultBasePrice(fullPrice);
-                companionDiscountAvailable = companionDiscountAvailable;
               }
             }
           }
@@ -160,6 +151,8 @@ public class Logic {
       }
       if (basePrice != null) {
         visitorFeeDetails.setBasePrice(visitorId, basePrice);
+      } else {
+        visitorFeeDetails.setBasePrice(visitorId, defaultBasePrice(fullPrice));
       }
     }
     return visitorFeeDetails;
