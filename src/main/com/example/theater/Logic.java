@@ -45,38 +45,23 @@ public class Logic {
 
   private @NotNull VisitorFeeDetails calculateBasePrices(@NotNull VisitorGroup visitorGroup) {
     VisitorFeeDetails visitorFeeDetails = createVisitorFeeDetails();
-    Price fullPrice = priceConfiguration.getBasePrice();
-    Price eightyPercentOfBasePrice = new Price(fullPrice.value() * 4 / 5);
-    Price twentyPercentOfBasePrice =
-        new Price(fullPrice.value() - eightyPercentOfBasePrice.value());
-    Price halfOfBasePrice = new Price(fullPrice.value() / 2);
 
     boolean companionDiscountAvailable = false;
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
       DiscountType discountTypeByVisitorProperties = visitor.discount();
-      @Nullable BasePrice basePrice = null;
-      @Nullable VisitorFeeDetails feeDetailsForShareHolder = null;
       boolean companionDiscount = companionDiscountAvailable;
       SelectedPrice selectedPrice =
           selectPriceByVisitorProperties(
-              visitorGroup,
-              discountTypeByVisitorProperties,
-              companionDiscount,
-              basePrice,
-              eightyPercentOfBasePrice,
-              twentyPercentOfBasePrice,
-              feeDetailsForShareHolder,
-              fullPrice,
-              halfOfBasePrice,
-              visitorFeeDetails);
+              visitorGroup, discountTypeByVisitorProperties, companionDiscount, visitorFeeDetails);
       if (selectedPrice.feeDetailsForShareHolder() != null) {
         return selectedPrice.feeDetailsForShareHolder();
       }
       if (selectedPrice.basePrice() != null) {
         visitorFeeDetails.setBasePrice(visitorId, selectedPrice.basePrice());
       } else {
-        visitorFeeDetails.setBasePrice(visitorId, defaultBasePrice(fullPrice));
+        visitorFeeDetails.setBasePrice(
+            visitorId, defaultBasePrice(priceConfiguration.getBasePrice()));
       }
       companionDiscountAvailable = selectedPrice.companionDiscount();
     }
@@ -87,13 +72,14 @@ public class Logic {
       @NotNull VisitorGroup visitorGroup,
       DiscountType discountTypeByVisitorProperties,
       boolean companionDiscount,
-      @Nullable BasePrice basePrice,
-      Price eightyPercentOfBasePrice,
-      Price twentyPercentOfBasePrice,
-      @Nullable VisitorFeeDetails feeDetailsForShareHolder,
-      Price fullPrice,
-      Price halfOfBasePrice,
       VisitorFeeDetails visitorFeeDetails) {
+    Price fullPrice = priceConfiguration.getBasePrice();
+    Price eightyPercentOfBasePrice = new Price(fullPrice.value() * 4 / 5);
+    Price twentyPercentOfBasePrice =
+        new Price(fullPrice.value() - eightyPercentOfBasePrice.value());
+    Price halfOfBasePrice = new Price(fullPrice.value() / 2);
+    @Nullable BasePrice basePrice = null;
+    @Nullable VisitorFeeDetails feeDetailsForShareHolder = null;
     if (discountTypeByVisitorProperties == null) {
       if (companionDiscount) {
         basePrice =
