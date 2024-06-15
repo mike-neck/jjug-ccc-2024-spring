@@ -44,21 +44,13 @@ public class Logic {
       @NotNull VisitorGroup visitorGroup,
       Map<UUID, Price> visitorToPrice,
       Map<UUID, List<Discount>> visitorToDiscount) {
-    boolean companionDiscountAvailable = false;
-    calculateBasePrices(
-        visitorGroup, companionDiscountAvailable, visitorToPrice, visitorToDiscount);
-  }
-
-  private void calculateBasePrices(
-      @NotNull VisitorGroup visitorGroup,
-      boolean companionDiscountAvailable,
-      Map<UUID, Price> visitorToPrice,
-      Map<UUID, List<Discount>> visitorToDiscount) {
     Price basePrice = priceConfiguration.getBasePrice();
     Price eightyPercentOfBasePrice = new Price(basePrice.value() * 4 / 5);
     Price twentyPercentOfBasePrice =
         new Price(basePrice.value() - eightyPercentOfBasePrice.value());
     Price halfOfBasePrice = new Price(basePrice.value() / 2);
+
+    boolean companionDiscountAvailable = false;
     for (Visitor visitor : visitorGroup) {
       UUID visitorId = visitor.id();
       DiscountType discountTypeByVisitorProperties = visitor.discount();
